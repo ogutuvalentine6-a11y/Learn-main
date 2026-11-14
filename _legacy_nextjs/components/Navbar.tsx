@@ -27,6 +27,9 @@ export default function Navbar({ role, name }: NavbarProps) {
   const [busy, setBusy] = useState(false);
   const [me, setMe] = useState<{ role: string; fullName: string } | null>(null);
   const [open, setOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifs, setNotifs] = useState<any[]>([]);
 
   useEffect(() => {
     if (role) return; // dashboard passed role explicitly
@@ -35,6 +38,28 @@ export default function Navbar({ role, name }: NavbarProps) {
       .then((d) => setMe(d))
       .catch(() => setMe(null));
   }, [role]);
+
+  useEffect(() => {
+    if (!me) return;
+    fetch("/api/notifications/unread-count")
+      .then((r) => (r.ok ? r.json() : { count: 0 }))
+      .then((d) => setUnread(d.count || 0))
+      .catch(() => {});
+  }, [me]);
+
+  async function openNotifications() {
+    setNotifOpen((v) => !v);
+    if (notifs.length === 0) {
+      const d = await fetch("/api/notifications?limit=10").then((r) => r.ok ? r.json() : []);
+      setNotifs(Array.isArray(d) ? d : []);
+    }
+  }
+
+  async function markAllRead() {
+    await fetch("/api/notifications/read-all", { method: "PATCH" });
+    setUnread(0);
+    setNotifs((n) => n.map((x) => ({ ...x, read: true })));
+  }
 
   async function logout() {
     setBusy(true);
