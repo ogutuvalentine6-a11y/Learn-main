@@ -45,6 +45,7 @@ const NAV: Record<string, Item[]> = {
     { label: "Live Sessions", href: "/live" },
     { label: "Discussions", href: "/discussions" },
     { label: "Study Groups", href: "/study-groups" },
+    { label: "Admissions", href: "/admin/admissions" },
     { label: "Users", href: "/admin/users" },
     { label: "Courses", href: "/admin/courses" },
     { label: "Assign Staff", href: "/admin/assign-staff" },

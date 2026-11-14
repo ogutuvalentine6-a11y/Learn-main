@@ -20,6 +20,7 @@ const PUBLIC_LINKS = [
   { href: "/certificates", label: "Certificates" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  { href: "/admissions", label: "Apply" },
 ];
 
 export default function Navbar({ role, name }: NavbarProps) {
