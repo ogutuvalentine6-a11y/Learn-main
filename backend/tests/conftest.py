@@ -75,6 +75,9 @@ def _init_indexes():
     db.user_badges.create_index(
         [("userId", 1), ("badgeId", 1)], unique=True
     )
+    db.attendance.create_index(
+        [("slotId", 1), ("date", 1), ("studentId", 1)], unique=True
+    )
     yield
 
     sync_client.close()

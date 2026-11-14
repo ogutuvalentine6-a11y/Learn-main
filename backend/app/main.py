@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from app.core.config import get_settings
-from app.routers import auth, courses, learning, payments, uploads, admin, public, media, homepage, resources, reels, live, community, analytics, public_api, assignments, certificates, notifications, admissions, modules, quizzes, guardian, jobs, gamification, finance, search, academic
+from app.routers import auth, courses, learning, payments, uploads, admin, public, media, homepage, resources, reels, live, community, analytics, public_api, assignments, certificates, notifications, admissions, modules, quizzes, guardian, jobs, gamification, finance, search, academic, timetable, attendance
 
 settings = get_settings()
 
@@ -71,6 +71,8 @@ app.include_router(gamification.router)
 app.include_router(finance.router)
 app.include_router(search.router)
 app.include_router(academic.router)
+app.include_router(timetable.router)
+app.include_router(attendance.router)
 
 
 @app.get("/health")
