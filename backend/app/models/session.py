@@ -16,6 +16,7 @@ class Quiz(BaseModel):
 
 class SessionCreate(BaseModel):
     courseId: str
+    moduleId: Optional[str] = None  # added by v1.5.0
     orderIndex: int = Field(..., gt=0)
     title: str = Field(..., min_length=2)
     notes: str = ""
@@ -26,6 +27,8 @@ class SessionCreate(BaseModel):
 class SessionInDB(BaseModel):
     id: PyObjectId = Field(alias="_id")
     courseId: PyObjectId
+    moduleId: Optional[str] = None  # added by v1.5.0
+    moduleId: Optional[str] = None
     orderIndex: int
     title: str
     notes: str = ""
