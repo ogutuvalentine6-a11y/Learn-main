@@ -12,6 +12,7 @@ const PUBLIC_LINKS = [
   { href: "/#courses", label: "Courses" },
   { href: "/resources", label: "Resources" },
   { href: "/reels", label: "Reels" },
+  { href: "/live", label: "Live" },
   { href: "/#about", label: "About" },
   { href: "/#contact", label: "Contact" },
 ];
