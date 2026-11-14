@@ -22,8 +22,13 @@ def _create(collection, keys, unique=False, name=None, sparse=False):
         )
         print(f"  ✅ {collection.name}.{idx_name}" + (" [unique]" if unique else ""))
     except OperationFailure as e:
-        # Duplicate data exists — index cannot be created
-        print(f"  ⚠️  {collection.name}.{idx_name}: {e}")
+        if e.code == 85:
+            # IndexOptionsConflict — an equivalent index already exists
+            # (different name but same keys/options). Not a problem.
+            print(f"  ℹ️  {collection.name}.{idx_name}: equivalent index exists")
+        else:
+            # Real problem — e.g. duplicate data blocking a unique index
+            print(f"  ⚠️  {collection.name}.{idx_name}: {e}")
 
 
 def main() -> int:

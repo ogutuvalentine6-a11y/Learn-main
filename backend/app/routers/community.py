@@ -217,6 +217,7 @@ async def reply_create(
     thread_id: str,
     payload: ReplyCreate,
     auth: UserInDB = Depends(get_current_user),
+    _rl: None = Depends(write_rate_guard),
 ):
     db = get_database()
     tid = _oid(thread_id)
@@ -275,6 +276,7 @@ async def reply_delete(
 async def group_create(
     payload: StudyGroupCreate,
     auth: UserInDB = Depends(get_current_user),
+    _rl: None = Depends(write_rate_guard),
 ):
     if payload.courseId and not await _can_access_course(auth, payload.courseId):
         raise HTTPException(status_code=403, detail="No access to that course")
