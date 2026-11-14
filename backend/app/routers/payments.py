@@ -13,6 +13,7 @@ from app.models.user import UserInDB
 from app.services import paystack_service as paystack
 from app.services.logger import log_action
 from app.services.notifier import notify_user
+from app.services.finance import create_invoice_from_payment
 
 router = APIRouter(prefix="/api", tags=["payments"])
 settings = get_settings()
@@ -155,6 +156,11 @@ async def paystack_verify(
         body=f"You are now enrolled in {course_title}.",
         link="/student/dashboard",
     )
+
+    # Auto-generate invoice (idempotent)
+    fresh = await db.payments.find_one({"_id": payment["_id"]})
+    if fresh:
+        await create_invoice_from_payment(fresh)
     return {"ok": True}
 
 
@@ -216,4 +222,9 @@ async def paystack_webhook(request: Request):
         body=f"You are now enrolled in {course_title}.",
         link="/student/dashboard",
     )
+
+    # Auto-generate invoice (idempotent)
+    fresh = await db.payments.find_one({"_id": payment["_id"]})
+    if fresh:
+        await create_invoice_from_payment(fresh)
     return {"ok": True}
