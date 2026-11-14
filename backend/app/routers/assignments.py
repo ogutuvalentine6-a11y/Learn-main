@@ -16,6 +16,7 @@ from app.models.assignment import (
 from app.models.user import UserInDB
 from app.services.logger import log_action
 from app.services.notifier import notify_course_students, notify_user
+from app.services.gamification import award_badge, award_points
 
 router = APIRouter(prefix="/api/assignments", tags=["assignments"])
 
@@ -221,6 +222,10 @@ async def assignment_submit(
     }
     result = await db.submissions.insert_one(doc)
     doc["_id"] = result.inserted_id
+
+    # Gamification — first submission badge + points for this assignment
+    await award_points(auth.id, "assignment_submission", str(result.inserted_id))
+    await award_badge(auth.id, "first_submission")
     return SubmissionInDB(**doc)
 
 
@@ -286,4 +291,10 @@ async def submission_grade(
         ),
         link=f"/assignments/{a['_id']}",
     )
+
+    # Gamification — high grade bonus (80%+)
+    if a["maxScore"] > 0 and payload.score / a["maxScore"] >= 0.8:
+        await award_points(
+            str(s["studentId"]), "assignment_high_grade", str(s["_id"]),
+        )
     return SubmissionInDB(**updated)

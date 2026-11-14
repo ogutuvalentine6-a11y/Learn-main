@@ -2,22 +2,24 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { useTranslation } from "@/contexts/LanguageContext";
 import Footer from "@/components/Footer";
 
 const FIELDS = [
-  { name: "fullName", label: "Full Name", type: "text" },
-  { name: "idNumber", label: "ID Number", type: "text" },
-  { name: "email", label: "Email", type: "email" },
-  { name: "phone", label: "Phone", type: "text" },
-  { name: "location", label: "Location", type: "text" },
-  { name: "school", label: "School / Institution", type: "text" },
-  { name: "fieldOfStudy", label: "Field of Study", type: "text" },
-  { name: "courseOfStudy", label: "Course of Study", type: "text" },
-  { name: "password", label: "Password", type: "password" },
+  { name: "fullName", labelKey: "auth.register.fullName", type: "text" },
+  { name: "idNumber", labelKey: "auth.register.idNumber", type: "text" },
+  { name: "email", labelKey: "auth.register.email", type: "email" },
+  { name: "phone", labelKey: "auth.register.phone", type: "text" },
+  { name: "location", labelKey: "auth.register.location", type: "text" },
+  { name: "school", labelKey: "auth.register.school", type: "text" },
+  { name: "fieldOfStudy", labelKey: "auth.register.fieldOfStudy", type: "text" },
+  { name: "courseOfStudy", labelKey: "auth.register.courseOfStudy", type: "text" },
+  { name: "password", labelKey: "auth.register.password", type: "password" },
 ] as const;
 
 export default function Register() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [form, setForm] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -44,11 +46,11 @@ export default function Register() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <div className="mx-auto mt-10 mb-8 w-full max-w-2xl flex-1 rounded-lg bg-white p-8 shadow">
-        <h1 className="mb-6 text-2xl font-bold">Create an account</h1>
+        <h1 className="mb-6 text-2xl font-bold">{t("auth.register.title")}</h1>
         <form onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {FIELDS.map((f) => (
             <div key={f.name} className={f.name === "password" ? "md:col-span-2" : ""}>
-              <label className="mb-1 block text-sm font-medium">{f.label}</label>
+              <label className="mb-1 block text-sm font-medium">{t(f.labelKey)}</label>
               <input
                 type={f.type}
                 value={form[f.name] || ""}
@@ -63,13 +65,13 @@ export default function Register() {
             disabled={busy}
             className="md:col-span-2 rounded bg-brand-600 py-2 text-white hover:bg-brand-700 disabled:opacity-50"
           >
-            {busy ? "..." : "Register"}
+            {busy ? "..." : t("auth.register.submit")}
           </button>
         </form>
         <p className="mt-4 text-sm text-gray-600">
-          Already registered?{" "}
+          {t("auth.register.haveAccount")}{" "}
           <Link href="/login" className="text-brand-600 underline">
-            Login
+            {t("auth.register.login")}
           </Link>
         </p>
       </div>

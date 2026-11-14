@@ -16,6 +16,7 @@ from app.models.quiz import (
 )
 from app.models.user import UserInDB
 from app.services.logger import log_action
+from app.services.gamification import award_badge, award_points
 
 router = APIRouter(prefix="/api/quizzes", tags=["quizzes"])
 
@@ -297,6 +298,15 @@ async def quiz_submit(
         }},
         return_document=True,
     )
+
+    # ── Gamification awards (idempotent — safe on retry) ──
+    if passed:
+        entity = str(attempt["_id"])
+        await award_points(auth.id, "quiz_pass", entity)
+        await award_badge(auth.id, "first_quiz_pass")
+        if percent == 100.0:
+            await award_points(auth.id, "quiz_perfect_bonus", entity)
+            await award_badge(auth.id, "perfect_score")
     return AttemptInDB(**updated)
 
 

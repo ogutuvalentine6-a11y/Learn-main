@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { useTranslation } from "@/contexts/LanguageContext";
 import Footer from "@/components/Footer";
 
 export default function Login() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export default function Login() {
     });
     const data = await res.json();
     setBusy(false);
-    if (!res.ok) return setError(data.error || "Login failed");
+    if (!res.ok) return setError(data.error || t("auth.login.failed"));
     if (data.role === "admin") router.push("/admin/dashboard");
     else if (data.role === "staff") router.push("/staff/dashboard");
     else router.push("/student/dashboard");
@@ -32,11 +34,11 @@ export default function Login() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <div className="mx-auto mt-16 w-full max-w-md flex-1 rounded-lg bg-white p-8 shadow">
-        <h1 className="mb-6 text-2xl font-bold">Login</h1>
+        <h1 className="mb-6 text-2xl font-bold">{t("auth.login.title")}</h1>
         <form onSubmit={submit} className="space-y-4">
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t("auth.login.email")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -44,7 +46,7 @@ export default function Login() {
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder={t("auth.login.password")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -55,13 +57,13 @@ export default function Login() {
             disabled={busy}
             className="w-full rounded bg-brand-600 py-2 text-white hover:bg-brand-700 disabled:opacity-50"
           >
-            {busy ? "..." : "Login"}
+            {busy ? "..." : t("auth.login.submit")}
           </button>
         </form>
         <p className="mt-4 text-sm text-gray-600">
-          No account?{" "}
+          {t("auth.login.noAccount")}{" "}
           <Link href="/register" className="text-brand-600 underline">
-            Register
+            {t("auth.login.register")}
           </Link>
         </p>
       </div>

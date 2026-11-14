@@ -5,9 +5,23 @@ interface Hero { title: string; subtitle: string; badgeText: string; primaryCtaL
 interface Founder { name: string; role: string; bio: string; githubUrl: string; avatarUrl: string; }
 interface Cta { title: string; subtitle: string; primaryLabel: string; primaryHref: string; secondaryLabel: string; secondaryHref: string; }
 interface Announcement { id: string; text: string; link: string; active: boolean; }
+interface HeroSlide { id: string; title: string; subtitle: string; imageUrl: string; ctaLabel: string; ctaHref: string; active: boolean; }
+interface Testimonial { id: string; name: string; role: string; quote: string; avatarUrl: string; approved: boolean; }
+interface Faq { id: string; question: string; answer: string; }
+interface FooterLink { label: string; href: string; }
+interface FooterLinkGroup { title: string; links: FooterLink[]; }
+
 interface Homepage {
-  hero: Hero; founder: Founder; cta: Cta;
+  hero: Hero;
+  heroSlides: HeroSlide[];
+  founder: Founder;
+  cta: Cta;
   announcements: Announcement[];
+  testimonials: Testimonial[];
+  faqs: Faq[];
+  footerLinks: FooterLinkGroup[];
+  featuredCourseIds: string[];
+  featuredInstructorIds: string[];
   published: boolean;
 }
 

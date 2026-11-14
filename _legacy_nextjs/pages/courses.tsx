@@ -89,10 +89,10 @@ export default function CoursesPage() {
                   <span className="text-xs text-gray-500">{c.enrollments} enrolled</span>
                 </div>
                 <Link
-                  href="/login"
+                  href={`/courses/${c.id}`}
                   className="mt-3 rounded bg-brand-600 py-2 text-center text-sm text-white hover:bg-brand-700"
                 >
-                  Enroll
+                  View course
                 </Link>
               </div>
             ))}

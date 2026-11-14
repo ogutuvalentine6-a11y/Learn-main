@@ -62,6 +62,7 @@ async def session_create(
     now = _utcnow()
     doc = {
         "courseId": ObjectId(payload.courseId),
+        "moduleId": payload.moduleId,  # optional, backwards compatible
         "orderIndex": payload.orderIndex,
         "title": payload.title,
         "notes": payload.notes,
@@ -108,7 +109,7 @@ async def session_update(
 
     # SECURITY: whitelist. Session update cannot change courseId, _id,
     # createdAt, or any field outside this set.
-    ALLOWED = {"title", "notes", "materialUrls", "quiz", "orderIndex"}
+    ALLOWED = {"title", "notes", "materialUrls", "quiz", "orderIndex", "moduleId"}
     unknown = set(payload.keys()) - ALLOWED
     if unknown:
         raise HTTPException(

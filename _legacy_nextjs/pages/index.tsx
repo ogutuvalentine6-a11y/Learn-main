@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 interface Course {
   _id: string;
@@ -31,6 +32,7 @@ interface HomepageContent {
 }
 
 export default function Home() {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState<Course[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [home, setHome] = useState<HomepageContent | null>(null);
@@ -58,13 +60,13 @@ export default function Home() {
       <section className="bg-gradient-to-b from-brand-50 to-white">
         <div className="mx-auto max-w-7xl px-6 py-20 text-center md:py-28">
           <span className="inline-block rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
-            {home?.hero.badgeText ?? "Learning without limits"}
+            {home?.hero.badgeText ?? t("home.hero.badge")}
           </span>
           <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 md:text-6xl">
-            {home?.heroSlides?.filter((s) => s.active)[0]?.title ?? home?.hero.title ?? "Learn Without Limits. Build Your Future."}
+            {home?.heroSlides?.filter((s) => s.active)[0]?.title ?? home?.hero.title ?? t("home.hero.title")}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-            {home?.heroSlides?.filter((s) => s.active)[0]?.subtitle ?? home?.hero.subtitle ?? "Discover quality education, connect with experienced instructors, access learning resources, and develop the skills you need to succeed."}
+            {home?.heroSlides?.filter((s) => s.active)[0]?.subtitle ?? home?.hero.subtitle ?? t("home.hero.subtitle")}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -87,10 +89,10 @@ export default function Home() {
       <section className="border-y bg-gray-50">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
           {[
-            { label: "Students", value: stats?.students },
-            { label: "Courses", value: stats?.courses },
-            { label: "Instructors", value: stats?.instructors },
-            { label: "Enrollments", value: stats?.enrollments },
+            { label: t("home.stats.students"), value: stats?.students },
+            { label: t("home.stats.courses"), value: stats?.courses },
+            { label: t("home.stats.instructors"), value: stats?.instructors },
+            { label: t("home.stats.enrollments"), value: stats?.enrollments },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-3xl font-bold text-brand-600">
@@ -110,9 +112,9 @@ export default function Home() {
       <section id="courses" className="mx-auto max-w-7xl px-6 py-20">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900">Explore Courses</h2>
+            <h2 className="text-3xl font-bold text-gray-900">{t("home.courses.heading")}</h2>
             <p className="mt-2 text-gray-600">
-              Real courses from the platform catalog — no placeholders.
+              {t("home.courses.subtitle")}
             </p>
           </div>
           <Link
@@ -127,7 +129,7 @@ export default function Home() {
           <p className="mt-10 text-center text-gray-500">Loading courses…</p>
         ) : courses.length === 0 ? (
           <div className="mt-10 rounded-lg border border-dashed p-10 text-center text-gray-500">
-            No courses are published yet. Check back soon.
+            {t("home.courses.empty")}
           </div>
         ) : (
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">

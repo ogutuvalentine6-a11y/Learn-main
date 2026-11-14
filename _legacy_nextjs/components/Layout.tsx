@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 
 interface LayoutProps {
-  role: "student" | "staff" | "admin";
+  role: "student" | "staff" | "admin" | "guardian";
   name?: string;
   children: ReactNode;
 }

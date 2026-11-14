@@ -1,6 +1,9 @@
+type FooterLink = { label: string; href: string };
+type FooterLinkGroup = { title: string; links: FooterLink[] };
+
 import Link from "next/link";
 
-export default function Footer() {
+export default function Footer({ groups }: { groups?: FooterLinkGroup[] } = {}) {
   const year = new Date().getFullYear();
 
   return (

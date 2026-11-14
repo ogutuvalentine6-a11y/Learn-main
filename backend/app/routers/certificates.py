@@ -10,6 +10,7 @@ from app.dependencies import get_current_user, require_role
 from app.models.user import UserInDB
 from app.services.logger import log_action
 from app.services.notifier import notify_user
+from app.services.gamification import award_badge, award_points, count_user_certificates
 
 router = APIRouter(prefix="/api/certificates", tags=["certificates"])
 
@@ -41,6 +42,20 @@ async def _notify_certificate(student_id: str, course_id: str, cert_id: str) -> 
             body=f"Your certificate for {course_title} is ready ({cert_id}).",
             link="/student/certificates",
         )
+    except Exception:
+        pass
+
+
+async def _award_certificate_gamification(
+    student_id: str, cert_id: str,
+) -> None:
+    """Points + badges on first course completion, and 3-course milestone."""
+    try:
+        await award_points(student_id, "course_complete", cert_id)
+        await award_badge(student_id, "course_complete")
+        total = await count_user_certificates(student_id)
+        if total >= 3:
+            await award_badge(student_id, "three_courses")
     except Exception:
         pass
 
@@ -97,6 +112,7 @@ async def claim_certificate(
         )
     cert = await _issue(auth.id, course_id, issued_by=auth.id)
     await _notify_certificate(auth.id, course_id, cert["certificateId"])
+    await _award_certificate_gamification(auth.id, cert["certificateId"])
     return {
         "certificateId": cert["certificateId"],
         "issuedAt": cert.get("issuedAt"),
@@ -118,6 +134,7 @@ async def admin_issue(
 
     cert = await _issue(studentId, courseId, issued_by=auth.id)
     await _notify_certificate(studentId, courseId, cert["certificateId"])
+    await _award_certificate_gamification(studentId, cert["certificateId"])
     return {
         "certificateId": cert["certificateId"],
         "issuedAt": cert.get("issuedAt"),
