@@ -4,11 +4,13 @@ from app.core.config import get_settings
 settings = get_settings()
 _client: AsyncIOMotorClient | None = None
 
+
 def get_client() -> AsyncIOMotorClient:
     global _client
     if _client is None:
-        _client = AsyncIOMotorClient(settings.MONGO_URI)
+        _client = AsyncIOMotorClient(settings.MONGODB_URI)
     return _client
+
 
 def get_database():
     return get_client()[settings.DATABASE_NAME]

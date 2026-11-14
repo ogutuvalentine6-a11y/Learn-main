@@ -1,9 +1,20 @@
-import bcrypt
 from datetime import datetime, timedelta, timezone
+
+import bcrypt
 from jose import jwt
+
 from app.core.config import get_settings
 
 settings = get_settings()
+
+BCRYPT_ROUNDS = 12  # matches legacy lib/auth.ts hashPassword
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(
+        password.encode("utf-8"), bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+    ).decode("utf-8")
+
 
 def verify_password(plain: str, hashed: str) -> bool:
     try:
@@ -11,12 +22,22 @@ def verify_password(plain: str, hashed: str) -> bool:
     except (ValueError, TypeError):
         return False
 
-def get_password_hash(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-def create_access_token(data: dict) -> str:
-    to_encode = data.copy()
-    to_encode["exp"] = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+def create_access_token(user_id: str, role: str, email: str) -> str:
+    """JWT payload matches legacy {id, role, email} with 7-day expiry."""
+    now = datetime.now(timezone.utc)
+    payload = {
+        "id": user_id,
+        "role": role,
+        "email": email,
+        "iat": now,
+        "exp": now + timedelta(days=settings.ACCESS_TOKEN_EXPIRE_DAYS),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.ALGORITHM)
+
+
+def decode_token(token: str) -> dict | None:
+    try:
+        return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
+    except Exception:
+        return None

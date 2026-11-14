@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.core.config import get_settings
-from app.routers import auth
+from app.routers import auth, courses, learning, payments, uploads, admin
 
 settings = get_settings()
 
@@ -16,6 +17,12 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(courses.router)
+app.include_router(learning.router)
+app.include_router(payments.router)
+app.include_router(uploads.router)
+app.include_router(admin.router)
+
 
 @app.get("/health")
 async def health():

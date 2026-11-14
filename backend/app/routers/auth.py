@@ -1,35 +1,108 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from app.core.security import verify_password, create_access_token, get_password_hash
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Response
+
+from app.core.config import get_settings
+from app.core.security import create_access_token, hash_password, verify_password
 from app.db.mongodb import get_database
-from app.models.user import UserCreate, UserPublic
+from app.dependencies import get_current_user
+from app.models.user import (
+    LoginResponse,
+    RegisterResponse,
+    UserInDB,
+    UserLogin,
+    UserPublic,
+    UserRegister,
+)
+from app.services.logger import log_action
+from app.services.rate_limiter import enforce
+from fastapi import Request
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(prefix="/api", tags=["auth"])
+settings = get_settings()
 
-@router.post("/register", response_model=UserPublic, status_code=201)
-async def register(payload: UserCreate):
+
+def _set_auth_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        key=settings.COOKIE_NAME,
+        value=token,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        httponly=True,
+        samesite="lax",
+        secure=False,  # set True behind HTTPS in prod
+        path="/",
+    )
+
+
+@router.post("/auth-register", response_model=RegisterResponse, status_code=201)
+async def register(payload: UserRegister, request: Request):
+    if not await enforce("auth", request):
+        raise HTTPException(status_code=429, detail="Too many requests")
+
     db = get_database()
-    if await db.users.find_one({"email": payload.email}):
-        raise HTTPException(status_code=400, detail="Email already registered")
+    email_lc = payload.email.lower()
+
+    if await db.users.find_one({"email": email_lc}):
+        raise HTTPException(status_code=409, detail="Email already registered")
+    if await db.users.find_one({"idNumber": payload.idNumber}):
+        raise HTTPException(status_code=409, detail="idNumber already registered")
+
+    now = datetime.now(timezone.utc)
     doc = {
-        "name": payload.name,
-        "email": payload.email,
-        "role": payload.role,
-        "hashed_password": get_password_hash(payload.password),
+        "idNumber": payload.idNumber,
+        "fullName": payload.fullName,
+        "email": email_lc,
+        "phone": payload.phone,
+        "location": payload.location,
+        "school": payload.school,
+        "fieldOfStudy": payload.fieldOfStudy,
+        "courseOfStudy": payload.courseOfStudy,
+        "password": hash_password(payload.password),
+        "role": "student",
+        "status": "active",
+        "emailVerified": False,
+        "createdAt": now,
+        "updatedAt": now,
     }
     result = await db.users.insert_one(doc)
-    doc["_id"] = str(result.inserted_id)
-    doc.pop("hashed_password", None)
-    return doc
+    await log_action(
+        actorId=str(result.inserted_id), action="register", target=email_lc
+    )
+    return {"id": str(result.inserted_id), "email": email_lc}
 
-@router.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await get_database().users.find_one({"email": form_data.username})
-    if not user or not verify_password(form_data.password, user["hashed_password"]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    token = create_access_token({"sub": user["email"], "role": user["role"]})
-    return {"access_token": token, "token_type": "bearer"}
+
+@router.post("/auth-login", response_model=LoginResponse)
+async def login(payload: UserLogin, response: Response, request: Request):
+    if not await enforce("auth", request):
+        raise HTTPException(status_code=429, detail="Too many requests")
+
+    db = get_database()
+    doc = await db.users.find_one({"email": payload.email.lower()})
+    if not doc or not verify_password(payload.password, doc["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if doc.get("status") == "blocked":
+        raise HTTPException(status_code=403, detail="Account blocked")
+
+    token = create_access_token(
+        user_id=str(doc["_id"]), role=doc["role"], email=doc["email"]
+    )
+    _set_auth_cookie(response, token)
+    return {
+        "id": str(doc["_id"]),
+        "role": doc["role"],
+        "email": doc["email"],
+        "fullName": doc["fullName"],
+    }
+
+
+@router.post("/auth-logout")
+async def logout(response: Response):
+    response.delete_cookie(settings.COOKIE_NAME, path="/")
+    return {"ok": True}
+
+
+@router.get("/auth-me", response_model=UserPublic)
+async def me(current: UserInDB = Depends(get_current_user)):
+    data = current.model_dump(by_alias=False)
+    data.pop("password", None)
+    return UserPublic.model_validate(data)
