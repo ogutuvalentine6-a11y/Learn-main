@@ -61,6 +61,79 @@ except Exception as e:
 finally:
     d.quit()
 
+# 4. Public courses page
+d = make_driver()
+try:
+    d.get(f"{BASE}/courses"); time.sleep(1.5)
+    body = d.find_element(By.TAG_NAME, "body").text
+    assert "Explore Courses" in body
+    print("✅ /courses loads")
+except Exception as e:
+    FAILS.append(("courses-page", str(e)[:200])); print(f"❌ /courses: {str(e)[:150]}")
+finally:
+    d.quit()
+
+# 5. Public instructors page
+d = make_driver()
+try:
+    d.get(f"{BASE}/instructors"); time.sleep(1.5)
+    body = d.find_element(By.TAG_NAME, "body").text
+    assert "Our Instructors" in body
+    print("✅ /instructors loads")
+except Exception as e:
+    FAILS.append(("instructors-page", str(e)[:200])); print(f"❌ /instructors: {str(e)[:150]}")
+finally:
+    d.quit()
+
+# 6. Public events page
+d = make_driver()
+try:
+    d.get(f"{BASE}/events"); time.sleep(1.5)
+    body = d.find_element(By.TAG_NAME, "body").text
+    assert "Upcoming Events" in body
+    print("✅ /events loads")
+except Exception as e:
+    FAILS.append(("events-page", str(e)[:200])); print(f"❌ /events: {str(e)[:150]}")
+finally:
+    d.quit()
+
+# 7. Certificates verify page
+d = make_driver()
+try:
+    d.get(f"{BASE}/certificates"); time.sleep(1.5)
+    body = d.find_element(By.TAG_NAME, "body").text
+    assert "Verify Certificate" in body
+    print("✅ /certificates loads")
+except Exception as e:
+    FAILS.append(("certificates-page", str(e)[:200])); print(f"❌ /certificates: {str(e)[:150]}")
+finally:
+    d.quit()
+
+# 8. About page
+d = make_driver()
+try:
+    d.get(f"{BASE}/about"); time.sleep(1.5)
+    body = d.find_element(By.TAG_NAME, "body").text
+    assert "About Learn" in body
+    assert "Valentine Otieno Ogutu" in body
+    print("✅ /about loads with founder")
+except Exception as e:
+    FAILS.append(("about-page", str(e)[:200])); print(f"❌ /about: {str(e)[:150]}")
+finally:
+    d.quit()
+
+# 9. Contact page
+d = make_driver()
+try:
+    d.get(f"{BASE}/contact"); time.sleep(1.5)
+    body = d.find_element(By.TAG_NAME, "body").text
+    assert "Contact" in body
+    print("✅ /contact loads")
+except Exception as e:
+    FAILS.append(("contact-page", str(e)[:200])); print(f"❌ /contact: {str(e)[:150]}")
+finally:
+    d.quit()
+
 # 4. Register → login → dashboard
 stamp = int(time.time() * 1000)
 email = f"sel-{stamp}@example.com"

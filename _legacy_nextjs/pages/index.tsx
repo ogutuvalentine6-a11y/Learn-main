@@ -68,7 +68,7 @@ export default function Home() {
               Get Started
             </Link>
             <Link
-              href="#courses"
+              href="/courses"
               className="rounded-lg border border-gray-300 px-6 py-3 text-gray-700 hover:border-brand-600 hover:text-brand-600"
             >
               Explore Courses

@@ -9,13 +9,17 @@ interface NavbarProps {
 
 const PUBLIC_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/#courses", label: "Courses" },
+  { href: "/courses", label: "Courses" },
   { href: "/resources", label: "Resources" },
   { href: "/reels", label: "Reels" },
   { href: "/live", label: "Live" },
+  { href: "/events", label: "Events" },
+  { href: "/instructors", label: "Instructors" },
   { href: "/discussions", label: "Discussions" },
-  { href: "/#about", label: "About" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/study-groups", label: "Study Groups" },
+  { href: "/certificates", label: "Certificates" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar({ role, name }: NavbarProps) {
