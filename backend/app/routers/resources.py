@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.config import get_settings
 from app.db.mongodb import get_database
-from app.dependencies import get_current_user, require_role, write_rate_guard
+from app.dependencies import get_current_user, get_optional_user, require_role, write_rate_guard
 from app.models.resource import ResourceCreate, ResourceInDB
 from app.models.user import UserInDB
 from app.services.cloudinary_service import generate_upload_signature
@@ -125,7 +125,7 @@ async def resource_list(
     q: Optional[str] = Query(default=None),
     mine: bool = Query(default=False),
     limit: int = Query(default=100, le=200),
-    auth: Optional[UserInDB] = Depends(get_current_user),
+    auth: Optional[UserInDB] = Depends(get_optional_user),
 ):
     filt: dict = {}
     if category:
@@ -174,7 +174,7 @@ async def resource_list(
 @router.post("/{resource_id}/download")
 async def resource_download(
     resource_id: str,
-    auth: Optional[UserInDB] = Depends(get_current_user),
+    auth: Optional[UserInDB] = Depends(get_optional_user),
 ):
     db = get_database()
     doc = await db.resources.find_one({"_id": _oid(resource_id)})

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.config import get_settings
 from app.db.mongodb import get_database
-from app.dependencies import get_current_user, require_role, write_rate_guard
+from app.dependencies import get_current_user, get_optional_user, require_role, write_rate_guard
 from app.models.reel import ReelCreate, ReelInDB
 from app.models.user import UserInDB
 from app.services.cloudinary_service import generate_upload_signature
@@ -88,7 +88,7 @@ async def reel_list(
     mine: bool = Query(default=False),
     limit: int = Query(default=30, le=100),
     skip: int = Query(default=0, ge=0),
-    auth: Optional[UserInDB] = Depends(get_current_user),
+    auth: Optional[UserInDB] = Depends(get_optional_user),
 ):
     filt: dict = {}
     if category:
