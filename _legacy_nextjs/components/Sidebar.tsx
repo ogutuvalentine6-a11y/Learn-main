@@ -12,6 +12,7 @@ const NAV: Record<string, Item[]> = {
     { label: "Courses", href: "/student/courses" },
     { label: "Certificate", href: "/student/certificate" },
     { label: "Resources", href: "/resources" },
+    { label: "Reels", href: "/reels" },
   ],
   staff: [
     { label: "Dashboard", href: "/staff/dashboard" },
@@ -20,12 +21,14 @@ const NAV: Record<string, Item[]> = {
     { label: "Student Progress", href: "/staff/student-progress" },
     { label: "Review Submissions", href: "/staff/review-submission" },
     { label: "Resources", href: "/resources" },
+    { label: "Reels", href: "/reels" },
   ],
   admin: [
     { label: "Dashboard", href: "/admin/dashboard" },
     { label: "Homepage", href: "/admin/homepage" },
     { label: "Media", href: "/admin/media" },
     { label: "Resources", href: "/admin/resources" },
+    { label: "Reels Moderation", href: "/admin/reels" },
     { label: "Users", href: "/admin/users" },
     { label: "Courses", href: "/admin/courses" },
     { label: "Assign Staff", href: "/admin/assign-staff" },
