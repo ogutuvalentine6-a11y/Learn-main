@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function Login() {
   const router = useRouter();
@@ -28,9 +29,9 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
-      <div className="mx-auto mt-16 max-w-md rounded-lg bg-white p-8 shadow">
+      <div className="mx-auto mt-16 w-full max-w-md flex-1 rounded-lg bg-white p-8 shadow">
         <h1 className="mb-6 text-2xl font-bold">Login</h1>
         <form onSubmit={submit} className="space-y-4">
           <input
@@ -64,6 +65,7 @@ export default function Login() {
           </Link>
         </p>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const FIELDS = [
   { name: "fullName", label: "Full Name", type: "text" },
@@ -32,14 +33,17 @@ export default function Register() {
     });
     const data = await res.json();
     setBusy(false);
-    if (!res.ok) return setError(typeof data.error === "string" ? data.error : "Registration failed");
+    if (!res.ok)
+      return setError(
+        typeof data.error === "string" ? data.error : "Registration failed"
+      );
     router.push("/login");
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
-      <div className="mx-auto mt-10 max-w-2xl rounded-lg bg-white p-8 shadow">
+      <div className="mx-auto mt-10 mb-8 w-full max-w-2xl flex-1 rounded-lg bg-white p-8 shadow">
         <h1 className="mb-6 text-2xl font-bold">Create an account</h1>
         <form onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {FIELDS.map((f) => (
@@ -69,6 +73,7 @@ export default function Register() {
           </Link>
         </p>
       </div>
+      <Footer />
     </div>
   );
 }

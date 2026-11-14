@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <Navbar />
-      <main className="mx-auto max-w-4xl px-6 py-20 text-center">
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-6 py-20 text-center">
         <h1 className="text-4xl font-bold text-gray-900">
           Learn. Track. Get Certified.
         </h1>
@@ -27,6 +28,7 @@ export default function Home() {
           </Link>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
