@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.config import get_settings
 from app.db.mongodb import get_database
-from app.dependencies import get_current_user, require_role
+from app.dependencies import get_current_user, require_role, write_rate_guard
 from app.models.resource import ResourceCreate, ResourceInDB
 from app.models.user import UserInDB
 from app.services.cloudinary_service import generate_upload_signature
@@ -66,6 +66,7 @@ async def upload_signature(auth: UserInDB = Depends(get_current_user)):
 async def resource_create(
     payload: ResourceCreate,
     auth: UserInDB = Depends(get_current_user),
+    _rl: None = Depends(write_rate_guard),
 ):
     if payload.visibility == "course" and not payload.courseId:
         raise HTTPException(status_code=400, detail="courseId required for course visibility")

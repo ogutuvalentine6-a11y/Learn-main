@@ -1,12 +1,13 @@
 from typing import Optional
 
 from bson import ObjectId
-from fastapi import Cookie, Depends, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import get_settings
 from app.core.security import decode_token
 from app.db.mongodb import get_database
+from app.services.rate_limiter import enforce
 from app.models.user import UserInDB
 
 settings = get_settings()
@@ -58,3 +59,9 @@ def require_role(*roles: str):
             raise HTTPException(status_code=403, detail="Forbidden")
         return current
     return checker
+
+
+async def write_rate_guard(request: Request) -> None:
+    """Dependency: reject with 429 if this IP exceeds 20 writes/minute."""
+    if not await enforce("write", request):
+        raise HTTPException(status_code=429, detail="Too many write requests")

@@ -5,7 +5,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.db.mongodb import get_database
-from app.dependencies import get_current_user, require_role
+from app.dependencies import get_current_user, require_role, write_rate_guard
 from app.models.community import (
     ReplyCreate,
     ReplyInDB,
@@ -57,9 +57,11 @@ async def _can_access_course(user: UserInDB, course_id: Optional[str]) -> bool:
 
 # ── THREADS ─────────────────────────────────────────────────────
 @router.post("/discussions/threads", response_model=ThreadInDB, status_code=201)
+# -- rate-limited via dependency in signature --
 async def thread_create(
     payload: ThreadCreate,
     auth: UserInDB = Depends(get_current_user),
+    _rl: None = Depends(write_rate_guard),
 ):
     if payload.courseId and not await _can_access_course(auth, payload.courseId):
         raise HTTPException(status_code=403, detail="Not enrolled in that course")
@@ -210,6 +212,7 @@ async def thread_delete(
     response_model=ReplyInDB,
     status_code=201,
 )
+# -- rate-limited via dependency in signature --
 async def reply_create(
     thread_id: str,
     payload: ReplyCreate,
@@ -268,6 +271,7 @@ async def reply_delete(
 
 # ── STUDY GROUPS ────────────────────────────────────────────────
 @router.post("/study-groups", response_model=StudyGroupInDB, status_code=201)
+# -- rate-limited via dependency in signature --
 async def group_create(
     payload: StudyGroupCreate,
     auth: UserInDB = Depends(get_current_user),

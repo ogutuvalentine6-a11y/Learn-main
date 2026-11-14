@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.config import get_settings
 from app.db.mongodb import get_database
-from app.dependencies import get_current_user, require_role
+from app.dependencies import get_current_user, require_role, write_rate_guard
 from app.models.live import (
     LiveAttendanceInDB,
     LiveSessionCreate,
@@ -95,6 +95,7 @@ async def _can_join(session: dict, user: UserInDB) -> bool:
 async def session_create(
     payload: LiveSessionCreate,
     auth: UserInDB = Depends(require_role("staff", "admin")),
+    _rl: None = Depends(write_rate_guard),
 ):
     # staff can only create for courses they're assigned to
     if auth.role == "staff" and payload.courseId:

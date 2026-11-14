@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from app.core.validators import validate_http_url
 
 from app.models._types import PyObjectId
 
@@ -30,6 +31,11 @@ class ResourceInDB(BaseModel):
     ownerName: str
     ownerRole: Literal["student", "staff", "admin"]
     visibility: ResourceVisibility = "private"
+
+    @field_validator("url")
+    @classmethod
+    def _check_url(cls, v: str) -> str:
+        return validate_http_url(v)
     status: ResourceStatus = "pending"
     rejectionReason: str = ""
     downloads: int = 0
@@ -50,3 +56,8 @@ class ResourceCreate(BaseModel):
     category: str = "General"
     courseId: Optional[str] = None
     visibility: ResourceVisibility = "private"
+
+    @field_validator("url")
+    @classmethod
+    def _check_url(cls, v: str) -> str:
+        return validate_http_url(v)

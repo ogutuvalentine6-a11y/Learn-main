@@ -105,7 +105,17 @@ async def session_update(
     if not session:
         raise HTTPException(status_code=404, detail="Not found")
     await _staff_must_be_assigned(auth, str(session["courseId"]))
-    updates = {**payload, "updatedAt": _utcnow()}
+
+    # SECURITY: whitelist. Session update cannot change courseId, _id,
+    # createdAt, or any field outside this set.
+    ALLOWED = {"title", "notes", "materialUrls", "quiz", "orderIndex"}
+    unknown = set(payload.keys()) - ALLOWED
+    if unknown:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Fields not allowed for update: {sorted(unknown)}",
+        )
+    updates = {**{k: payload[k] for k in payload if k in ALLOWED}, "updatedAt": _utcnow()}
     updated = await get_database().sessions.find_one_and_update(
         {"_id": oid}, {"$set": updates}, return_document=True
     )

@@ -91,11 +91,17 @@ async def upload_limit(ip: str) -> bool:
     return await _check(f"rl:upload:{ip}", 10, 60)
 
 
+async def write_limit(ip: str) -> bool:
+    return await _check(f"rl:write:{ip}", 20, 60)
+
+
 async def enforce(kind: str, request: Request) -> bool:
-    """kind ∈ {'general','auth','upload'}. Returns True if allowed."""
+    """kind ∈ {'general','auth','upload','write'}. Returns True if allowed."""
     ip = get_client_ip(request)
     if kind == "auth":
         return await auth_limit(ip)
     if kind == "upload":
         return await upload_limit(ip)
+    if kind == "write":
+        return await write_limit(ip)
     return await general_limit(ip)

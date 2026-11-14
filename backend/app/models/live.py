@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from app.core.validators import validate_http_url
 
 from app.models._types import PyObjectId
 
@@ -36,6 +37,11 @@ class LiveSessionCreate(BaseModel):
     scheduledAt: datetime
     durationMinutes: int = Field(default=60, ge=15, le=480)
     materials: list[str] = []
+
+    @field_validator("materials")
+    @classmethod
+    def _check_materials(cls, v: list[str]) -> list[str]:
+        return [validate_http_url(u) for u in v]
 
 
 class LiveSessionUpdate(BaseModel):

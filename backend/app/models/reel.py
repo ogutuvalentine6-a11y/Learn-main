@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from app.core.validators import validate_http_url
 
 from app.models._types import PyObjectId
 
@@ -19,6 +20,11 @@ class ReelInDB(BaseModel):
     category: str = "General"
     tags: list[str] = []
     courseId: Optional[str] = None
+
+    @field_validator("videoUrl", "thumbnailUrl")
+    @classmethod
+    def _check_urls(cls, v: str) -> str:
+        return validate_http_url(v)
     ownerId: PyObjectId
     ownerName: str
     ownerRole: Literal["student", "staff", "admin"]
@@ -42,3 +48,8 @@ class ReelCreate(BaseModel):
     category: str = "General"
     tags: list[str] = []
     courseId: Optional[str] = None
+
+    @field_validator("videoUrl", "thumbnailUrl")
+    @classmethod
+    def _check_urls(cls, v: str) -> str:
+        return validate_http_url(v)

@@ -67,7 +67,16 @@ async def course_update(
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid courseId")
 
-    updates = {**body, "updatedAt": _utcnow()}
+    # SECURITY: only these fields may be modified. Prevents mass-assignment
+    # of _id, createdBy, createdAt, isActive (soft-delete is a separate route).
+    ALLOWED = {"title", "description", "price"}
+    unknown = set(body.keys()) - ALLOWED
+    if unknown:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Fields not allowed for update: {sorted(unknown)}",
+        )
+    updates = {**{k: body[k] for k in body if k in ALLOWED}, "updatedAt": _utcnow()}
     updated = await get_database().courses.find_one_and_update(
         {"_id": oid},
         {"$set": updates},

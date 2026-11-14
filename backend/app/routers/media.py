@@ -2,7 +2,8 @@ from datetime import datetime, timezone
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from app.core.validators import validate_http_url
 
 from app.db.mongodb import get_database
 from app.dependencies import require_role
@@ -30,6 +31,11 @@ class MediaCreateRequest(BaseModel):
     visibility: str = "private"
     context: str = "other"
     contextId: str | None = None
+
+    @field_validator("url")
+    @classmethod
+    def _check_url(cls, v: str) -> str:
+        return validate_http_url(v)
 
 
 @router.post("/media", response_model=MediaAssetInDB, status_code=201)
