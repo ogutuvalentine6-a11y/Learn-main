@@ -19,9 +19,15 @@ interface Stats {
 
 interface HomepageContent {
   hero: { title: string; subtitle: string; badgeText: string; primaryCtaLabel: string; primaryCtaHref: string; secondaryCtaLabel: string; secondaryCtaHref: string; };
+  heroSlides?: { id: string; title: string; subtitle: string; imageUrl: string; ctaLabel: string; ctaHref: string; active: boolean }[];
   founder: { name: string; role: string; bio: string; githubUrl: string; };
   cta: { title: string; subtitle: string; primaryLabel: string; primaryHref: string; secondaryLabel: string; secondaryHref: string; };
   announcements: { id: string; text: string; link: string; active: boolean }[];
+  testimonials?: { id: string; name: string; role: string; quote: string; avatarUrl: string; approved: boolean }[];
+  faqs?: { id: string; question: string; answer: string }[];
+  footerLinks?: { title: string; links: { label: string; href: string }[] }[];
+  featuredCourseIds?: string[];
+  featuredInstructorIds?: string[];
 }
 
 export default function Home() {
@@ -55,10 +61,10 @@ export default function Home() {
             {home?.hero.badgeText ?? "Learning without limits"}
           </span>
           <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 md:text-6xl">
-            {home?.hero.title ?? "Learn Without Limits. Build Your Future."}
+            {home?.heroSlides?.filter((s) => s.active)[0]?.title ?? home?.hero.title ?? "Learn Without Limits. Build Your Future."}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-            {home?.hero.subtitle ?? "Discover quality education, connect with experienced instructors, access learning resources, and develop the skills you need to succeed."}
+            {home?.heroSlides?.filter((s) => s.active)[0]?.subtitle ?? home?.hero.subtitle ?? "Discover quality education, connect with experienced instructors, access learning resources, and develop the skills you need to succeed."}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -259,6 +265,31 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── TESTIMONIALS (only approved) ─────────────────────── */}
+      {(home?.testimonials || []).filter((t) => t.approved).length > 0 && (
+        <section className="bg-white py-20">
+          <div className="mx-auto max-w-7xl px-6">
+            <h2 className="text-center text-3xl font-bold text-gray-900">
+              What learners say
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-center text-gray-600">
+              Real stories from real students and instructors on Learn.
+            </p>
+            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {(home?.testimonials || []).filter((t) => t.approved).map((t) => (
+                <blockquote key={t.id} className="rounded-xl border bg-white p-6 shadow-sm">
+                  <p className="text-gray-700">"{t.quote}"</p>
+                  <footer className="mt-4 border-t pt-4">
+                    <p className="font-semibold text-gray-900">{t.name}</p>
+                    {t.role && <p className="text-sm text-gray-500">{t.role}</p>}
+                  </footer>
+                </blockquote>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── FAQ ──────────────────────────────────────────────── */}
       <section className="bg-gray-50 py-20">
         <div className="mx-auto max-w-3xl px-6">
@@ -266,28 +297,31 @@ export default function Home() {
             Frequently asked questions
           </h2>
           <div className="mt-10 space-y-3">
-            {[
-              {
-                q: "How do I create an account?",
-                a: "Click Get Started at the top of the page. Fill in the registration form — ID number, full name, email, phone, and a few details about your school and course. Then log in.",
-              },
-              {
-                q: "How do I enroll in a course?",
-                a: "Browse the courses on this page. Sign in, open a course, and click Enroll. Complete payment via Paystack if the course has a price, and you'll have immediate access to every session.",
-              },
-              {
-                q: "Are the courses free?",
-                a: "Some are. Each course shows its price on the listing. Courses marked Free require no payment to enroll.",
-              },
-              {
-                q: "Can instructors create their own courses?",
-                a: "Instructors (staff role) can manage sessions and quizzes for the courses they've been assigned to by an administrator. Course creation is restricted to administrators.",
-              },
-              {
-                q: "Is my data secure?",
-                a: "Yes. Passwords are hashed with bcrypt (12 rounds), sessions use HTTP-only cookies with SameSite protection, and every protected endpoint enforces role-based authorization on the backend.",
-              },
-            ].map((item) => (
+            {(home?.faqs && home.faqs.length > 0
+              ? home.faqs.map((f) => ({ q: f.question, a: f.answer }))
+              : [
+                  {
+                    q: "How do I create an account?",
+                    a: "Click Get Started at the top of the page. Fill in the registration form — ID number, full name, email, phone, and a few details about your school and course. Then log in.",
+                  },
+                  {
+                    q: "How do I enroll in a course?",
+                    a: "Browse the courses on this page. Sign in, open a course, and click Enroll. Complete payment via Paystack if the course has a price, and you'll have immediate access to every session.",
+                  },
+                  {
+                    q: "Are the courses free?",
+                    a: "Some are. Each course shows its price on the listing. Courses marked Free require no payment to enroll.",
+                  },
+                  {
+                    q: "Can instructors create their own courses?",
+                    a: "Instructors (staff role) can manage sessions and quizzes for the courses they've been assigned to by an administrator. Course creation is restricted to administrators.",
+                  },
+                  {
+                    q: "Is my data secure?",
+                    a: "Yes. Passwords are hashed with bcrypt (12 rounds), sessions use HTTP-only cookies with SameSite protection, and every protected endpoint enforces role-based authorization on the backend.",
+                  },
+                ]
+            ).map((item) => (
               <details
                 key={item.q}
                 className="rounded-lg border bg-white p-5 shadow-sm"
@@ -343,7 +377,7 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer />
+      <Footer groups={home?.footerLinks} />
     </div>
   );
 }

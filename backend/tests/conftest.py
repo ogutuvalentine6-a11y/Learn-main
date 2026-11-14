@@ -131,6 +131,10 @@ async def _create_user(role: str, email: str) -> dict:
         "updatedAt": now,
     }
     await db.users.insert_one(doc)
+    # Return _id as string to match every API response shape (which
+    # serializes ObjectId -> str). This makes fixtures interchangeable
+    # with response.json()['_id'] values in tests.
+    doc["_id"] = str(doc["_id"])
     return doc
 
 

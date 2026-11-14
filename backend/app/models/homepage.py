@@ -21,8 +21,20 @@ class HeroSection(BaseModel):
     primaryCtaLabel: str = "Get Started"
     primaryCtaHref: str = "/register"
     secondaryCtaLabel: str = "Explore Courses"
-    secondaryCtaHref: str = "#courses"
+    secondaryCtaHref: str = "/courses"
     backgroundImageUrl: str = ""
+
+
+class HeroSlide(BaseModel):
+    """Optional rotating hero slide. When any active slides exist,
+    the homepage renders them instead of the single `hero` block."""
+    id: str
+    title: str
+    subtitle: str = ""
+    imageUrl: str = ""
+    ctaLabel: str = "Get Started"
+    ctaHref: str = "/register"
+    active: bool = True
 
 
 class FounderSection(BaseModel):
@@ -31,6 +43,32 @@ class FounderSection(BaseModel):
     bio: str = ""
     githubUrl: str = "https://github.com/ogutuvalentine6-a11y"
     avatarUrl: str = ""
+
+
+class Testimonial(BaseModel):
+    """Admin-approved testimonial. Only shown on homepage when approved=true."""
+    id: str
+    name: str
+    role: str = ""  # e.g. "Student, BSc Computer Science"
+    quote: str
+    avatarUrl: str = ""
+    approved: bool = False  # admin must explicitly approve before it appears
+
+
+class Faq(BaseModel):
+    id: str
+    question: str
+    answer: str
+
+
+class FooterLink(BaseModel):
+    label: str
+    href: str
+
+
+class FooterLinkGroup(BaseModel):
+    title: str
+    links: List[FooterLink] = []
 
 
 class CtaSection(BaseModel):
@@ -46,10 +84,15 @@ class HomepageContentInDB(BaseModel):
     """Single-document config. `_id` is always 'main'."""
     id: str = Field(alias="_id")
     hero: HeroSection = HeroSection()
+    heroSlides: List[HeroSlide] = []
     founder: FounderSection = FounderSection()
     cta: CtaSection = CtaSection()
     announcements: List[AnnouncementItem] = []
+    testimonials: List[Testimonial] = []
+    faqs: List[Faq] = []
+    footerLinks: List[FooterLinkGroup] = []
     featuredCourseIds: List[str] = []
+    featuredInstructorIds: List[str] = []
     published: bool = True
     updatedAt: datetime
     updatedBy: Optional[str] = None
@@ -60,8 +103,13 @@ class HomepageContentInDB(BaseModel):
 class HomepageUpdate(BaseModel):
     """Admin PATCH body — all sections optional for partial updates."""
     hero: Optional[HeroSection] = None
+    heroSlides: Optional[List[HeroSlide]] = None
     founder: Optional[FounderSection] = None
     cta: Optional[CtaSection] = None
     announcements: Optional[List[AnnouncementItem]] = None
+    testimonials: Optional[List[Testimonial]] = None
+    faqs: Optional[List[Faq]] = None
+    footerLinks: Optional[List[FooterLinkGroup]] = None
     featuredCourseIds: Optional[List[str]] = None
+    featuredInstructorIds: Optional[List[str]] = None
     published: Optional[bool] = None
