@@ -18,6 +18,7 @@ const NAV: Record<string, Item[]> = {
     { label: "Study Groups", href: "/study-groups" },
     { label: "Discussions", href: "/discussions" },
     { label: "Study Groups", href: "/study-groups" },
+    { label: "Analytics", href: "/student/analytics" },
   ],
   staff: [
     { label: "Dashboard", href: "/staff/dashboard" },
@@ -32,9 +33,11 @@ const NAV: Record<string, Item[]> = {
     { label: "Study Groups", href: "/study-groups" },
     { label: "Discussions", href: "/discussions" },
     { label: "Study Groups", href: "/study-groups" },
+    { label: "Analytics", href: "/staff/analytics" },
   ],
   admin: [
     { label: "Dashboard", href: "/admin/dashboard" },
+    { label: "Analytics", href: "/admin/analytics" },
     { label: "Homepage", href: "/admin/homepage" },
     { label: "Media", href: "/admin/media" },
     { label: "Resources", href: "/admin/resources" },
