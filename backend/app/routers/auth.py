@@ -6,6 +6,7 @@ from app.core.config import get_settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.mongodb import get_database
 from app.dependencies import get_current_user
+from app.models.user import LanguageCode
 from app.models.user import (
     LoginResponse,
     RegisterResponse,
@@ -106,3 +107,35 @@ async def me(current: UserInDB = Depends(get_current_user)):
     data = current.model_dump(by_alias=False)
     data.pop("password", None)
     return UserPublic.model_validate(data)
+
+
+from pydantic import BaseModel as _PM
+
+
+class _LanguageUpdate(_PM):
+    language: LanguageCode
+
+
+@router.patch("/auth-me/language")
+async def update_language(
+    payload: _LanguageUpdate,
+    current: UserInDB = Depends(get_current_user),
+):
+    """Change the authenticated user's preferred language."""
+    from datetime import datetime, timezone
+    from bson import ObjectId
+    from app.db.mongodb import get_database
+
+    now = datetime.now(timezone.utc)
+    await get_database().users.update_one(
+        {"_id": ObjectId(current.id)},
+        {"$set": {"language": payload.language, "updatedAt": now}},
+    )
+    await log_action(
+        actorId=current.id,
+        action="user_language_change",
+        target=current.id,
+        meta={"language": payload.language},
+    )
+    return {"ok": True, "language": payload.language}
+

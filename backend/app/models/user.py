@@ -4,7 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-Role = Literal["student", "staff", "admin"]
+Role = Literal["student", "staff", "admin", "guardian"]
+LanguageCode = Literal["en", "sw", "fr", "zh", "ja"]
 UserStatus = Literal["active", "blocked"]
 
 
@@ -26,6 +27,7 @@ class UserBase(BaseModel):
     idNumber: str = Field(..., min_length=3)
     fullName: str = Field(..., min_length=2)
     email: EmailStr
+    language: LanguageCode = "en"
     phone: str = Field(..., min_length=7)
     location: str = Field(..., min_length=2)
     school: str = Field(..., min_length=2)
@@ -55,6 +57,7 @@ class UserInDB(UserBase):
     password: str  # bcrypt hash
     role: Role = "student"
     status: UserStatus = "active"
+    language: LanguageCode = "en"
     emailVerified: bool = False
     createdAt: datetime
     updatedAt: datetime

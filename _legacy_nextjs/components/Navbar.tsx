@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import SearchPalette from "./SearchPalette";
+import LanguageSelector from "./LanguageSelector";
 
 interface NavbarProps {
   role?: "student" | "staff" | "admin" | "guardian" | null;
@@ -278,6 +279,9 @@ export default function Navbar({ role, name }: NavbarProps) {
 
             {/* Right side */}
             <div className="ml-auto flex items-center gap-1 lg:gap-2">
+              {/* Language selector */}
+              <LanguageSelector />
+
               {/* Search */}
               <button
                 onClick={() => setSearchOpen(true)}
