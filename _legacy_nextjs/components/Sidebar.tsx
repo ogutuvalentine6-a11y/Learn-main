@@ -53,6 +53,7 @@ const NAV: Record<string, Item[]> = {
     { label: "Admissions", href: "/admin/admissions" },
     { label: "Guardians", href: "/admin/guardians" },
     { label: "Careers", href: "/admin/careers" },
+    { label: "Calendar", href: "/admin/calendar" },
     { label: "Users", href: "/admin/users" },
     { label: "Courses", href: "/admin/courses" },
     { label: "Assign Staff", href: "/admin/assign-staff" },

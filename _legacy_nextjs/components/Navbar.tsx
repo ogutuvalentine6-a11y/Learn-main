@@ -30,6 +30,7 @@ const NAV: NavItem[] = [
       { href: "/live", label: "Live Sessions", desc: "Interactive classrooms" },
       { href: "/events", label: "Events", desc: "Upcoming sessions" },
       { href: "/leaderboard", label: "Leaderboard", desc: "Top learners" },
+      { href: "/academic-calendar", label: "Academic Calendar", desc: "Semester dates & deadlines" },
     ],
   },
   {
