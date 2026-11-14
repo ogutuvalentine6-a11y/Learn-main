@@ -35,6 +35,9 @@ const NAV: Record<string, Item[]> = {
     { label: "Study Groups", href: "/study-groups" },
     { label: "Analytics", href: "/staff/analytics" },
   ],
+  guardian: [
+    { label: "Dashboard", href: "/guardian/dashboard" },
+  ],
   admin: [
     { label: "Dashboard", href: "/admin/dashboard" },
     { label: "Analytics", href: "/admin/analytics" },
@@ -46,6 +49,8 @@ const NAV: Record<string, Item[]> = {
     { label: "Discussions", href: "/discussions" },
     { label: "Study Groups", href: "/study-groups" },
     { label: "Admissions", href: "/admin/admissions" },
+    { label: "Guardians", href: "/admin/guardians" },
+    { label: "Careers", href: "/admin/careers" },
     { label: "Users", href: "/admin/users" },
     { label: "Courses", href: "/admin/courses" },
     { label: "Assign Staff", href: "/admin/assign-staff" },
@@ -55,7 +60,7 @@ const NAV: Record<string, Item[]> = {
   ],
 };
 
-export default function Sidebar({ role }: { role: "student" | "staff" | "admin" }) {
+export default function Sidebar({ role }: { role: "student" | "staff" | "admin" | "guardian" }) {
   const router = useRouter();
   const items = NAV[role] || [];
 
