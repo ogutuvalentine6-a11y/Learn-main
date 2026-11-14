@@ -21,6 +21,8 @@ const NAV: Record<string, Item[]> = {
   ],
   admin: [
     { label: "Dashboard", href: "/admin/dashboard" },
+    { label: "Homepage", href: "/admin/homepage" },
+    { label: "Media", href: "/admin/media" },
     { label: "Users", href: "/admin/users" },
     { label: "Courses", href: "/admin/courses" },
     { label: "Assign Staff", href: "/admin/assign-staff" },

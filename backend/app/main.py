@@ -1,12 +1,37 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 
 from app.core.config import get_settings
-from app.routers import auth, courses, learning, payments, uploads, admin
+from app.routers import auth, courses, learning, payments, uploads, admin, public, media, homepage
 
 settings = get_settings()
 
 app = FastAPI(title="Learn Platform API", version="0.1.0")
+
+# ── Legacy-shape error handlers (frontend expects {error, fields}) ──
+@app.exception_handler(HTTPException)
+async def _http_exc(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail if isinstance(exc.detail, str) else "Request failed"},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def _val_exc(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": "Invalid input",
+            "fields": jsonable_encoder(exc.errors()),
+        },
+    )
+
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +47,9 @@ app.include_router(learning.router)
 app.include_router(payments.router)
 app.include_router(uploads.router)
 app.include_router(admin.router)
+app.include_router(public.router)
+app.include_router(media.router)
+app.include_router(homepage.router)
 
 
 @app.get("/health")
