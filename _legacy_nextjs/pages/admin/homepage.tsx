@@ -159,6 +159,424 @@ export default function AdminHomepage() {
           </button>
         </section>
 
+        {/* ── Hero Slides (replaces single hero when non-empty) ── */}
+        <section className="rounded bg-white p-5 shadow">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold">Hero Slides</h2>
+              <p className="text-xs text-gray-500">
+                If any slides are active, they replace the single hero above.
+              </p>
+            </div>
+            <button
+              onClick={() =>
+                setData({
+                  ...data,
+                  heroSlides: [
+                    ...(data.heroSlides || []),
+                    {
+                      id: `slide-${Date.now()}`,
+                      title: "New Slide",
+                      subtitle: "",
+                      imageUrl: "",
+                      ctaLabel: "Get Started",
+                      ctaHref: "/register",
+                      active: true,
+                    },
+                  ],
+                })
+              }
+              className="rounded border border-brand-600 px-3 py-1 text-xs text-brand-600"
+            >
+              + Add slide
+            </button>
+          </div>
+          {(data.heroSlides || []).length === 0 ? (
+            <p className="text-sm text-gray-500">No slides — single hero is shown.</p>
+          ) : (
+            (data.heroSlides || []).map((s, i) => (
+              <div key={s.id} className="mb-2 rounded border p-3">
+                <div className="grid gap-2 md:grid-cols-2">
+                  <input
+                    value={s.title}
+                    onChange={(e) => {
+                      const arr = [...(data.heroSlides || [])];
+                      arr[i] = { ...arr[i], title: e.target.value };
+                      setData({ ...data, heroSlides: arr });
+                    }}
+                    placeholder="Title"
+                    className="rounded border px-2 py-1 text-sm"
+                  />
+                  <input
+                    value={s.subtitle}
+                    onChange={(e) => {
+                      const arr = [...(data.heroSlides || [])];
+                      arr[i] = { ...arr[i], subtitle: e.target.value };
+                      setData({ ...data, heroSlides: arr });
+                    }}
+                    placeholder="Subtitle"
+                    className="rounded border px-2 py-1 text-sm"
+                  />
+                  <input
+                    value={s.imageUrl}
+                    onChange={(e) => {
+                      const arr = [...(data.heroSlides || [])];
+                      arr[i] = { ...arr[i], imageUrl: e.target.value };
+                      setData({ ...data, heroSlides: arr });
+                    }}
+                    placeholder="Image URL"
+                    className="rounded border px-2 py-1 text-sm md:col-span-2"
+                  />
+                  <input
+                    value={s.ctaLabel}
+                    onChange={(e) => {
+                      const arr = [...(data.heroSlides || [])];
+                      arr[i] = { ...arr[i], ctaLabel: e.target.value };
+                      setData({ ...data, heroSlides: arr });
+                    }}
+                    placeholder="CTA label"
+                    className="rounded border px-2 py-1 text-sm"
+                  />
+                  <input
+                    value={s.ctaHref}
+                    onChange={(e) => {
+                      const arr = [...(data.heroSlides || [])];
+                      arr[i] = { ...arr[i], ctaHref: e.target.value };
+                      setData({ ...data, heroSlides: arr });
+                    }}
+                    placeholder="CTA href"
+                    className="rounded border px-2 py-1 text-sm"
+                  />
+                </div>
+                <div className="mt-2 flex items-center gap-3 text-xs">
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={s.active}
+                      onChange={(e) => {
+                        const arr = [...(data.heroSlides || [])];
+                        arr[i] = { ...arr[i], active: e.target.checked };
+                        setData({ ...data, heroSlides: arr });
+                      }}
+                    />
+                    Active
+                  </label>
+                  <button
+                    onClick={() =>
+                      setData({
+                        ...data,
+                        heroSlides: (data.heroSlides || []).filter((_, j) => j !== i),
+                      })
+                    }
+                    className="text-red-600 underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </section>
+
+        {/* ── Testimonials ── */}
+        <section className="rounded bg-white p-5 shadow">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold">Testimonials</h2>
+              <p className="text-xs text-gray-500">
+                Only approved testimonials appear on the public homepage.
+              </p>
+            </div>
+            <button
+              onClick={() =>
+                setData({
+                  ...data,
+                  testimonials: [
+                    ...(data.testimonials || []),
+                    {
+                      id: `t-${Date.now()}`,
+                      name: "",
+                      role: "",
+                      quote: "",
+                      avatarUrl: "",
+                      approved: false,
+                    },
+                  ],
+                })
+              }
+              className="rounded border border-brand-600 px-3 py-1 text-xs text-brand-600"
+            >
+              + Add testimonial
+            </button>
+          </div>
+          {(data.testimonials || []).length === 0 ? (
+            <p className="text-sm text-gray-500">No testimonials yet.</p>
+          ) : (
+            (data.testimonials || []).map((t, i) => (
+              <div key={t.id} className="mb-2 rounded border p-3">
+                <div className="grid gap-2 md:grid-cols-2">
+                  <input
+                    value={t.name}
+                    onChange={(e) => {
+                      const arr = [...(data.testimonials || [])];
+                      arr[i] = { ...arr[i], name: e.target.value };
+                      setData({ ...data, testimonials: arr });
+                    }}
+                    placeholder="Name"
+                    className="rounded border px-2 py-1 text-sm"
+                  />
+                  <input
+                    value={t.role}
+                    onChange={(e) => {
+                      const arr = [...(data.testimonials || [])];
+                      arr[i] = { ...arr[i], role: e.target.value };
+                      setData({ ...data, testimonials: arr });
+                    }}
+                    placeholder="Role (e.g. Student, BSc CS)"
+                    className="rounded border px-2 py-1 text-sm"
+                  />
+                </div>
+                <textarea
+                  value={t.quote}
+                  onChange={(e) => {
+                    const arr = [...(data.testimonials || [])];
+                    arr[i] = { ...arr[i], quote: e.target.value };
+                    setData({ ...data, testimonials: arr });
+                  }}
+                  placeholder="Quote"
+                  rows={2}
+                  className="mt-2 w-full rounded border px-2 py-1 text-sm"
+                />
+                <div className="mt-2 flex items-center gap-3 text-xs">
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={t.approved}
+                      onChange={(e) => {
+                        const arr = [...(data.testimonials || [])];
+                        arr[i] = { ...arr[i], approved: e.target.checked };
+                        setData({ ...data, testimonials: arr });
+                      }}
+                    />
+                    Approved (show publicly)
+                  </label>
+                  <button
+                    onClick={() =>
+                      setData({
+                        ...data,
+                        testimonials: (data.testimonials || []).filter((_, j) => j !== i),
+                      })
+                    }
+                    className="text-red-600 underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </section>
+
+        {/* ── FAQ ── */}
+        <section className="rounded bg-white p-5 shadow">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold">FAQ</h2>
+              <p className="text-xs text-gray-500">
+                If empty, the homepage shows its built-in default FAQ.
+              </p>
+            </div>
+            <button
+              onClick={() =>
+                setData({
+                  ...data,
+                  faqs: [
+                    ...(data.faqs || []),
+                    { id: `faq-${Date.now()}`, question: "", answer: "" },
+                  ],
+                })
+              }
+              className="rounded border border-brand-600 px-3 py-1 text-xs text-brand-600"
+            >
+              + Add FAQ
+            </button>
+          </div>
+          {(data.faqs || []).length === 0 ? (
+            <p className="text-sm text-gray-500">No FAQs — homepage default is used.</p>
+          ) : (
+            (data.faqs || []).map((f, i) => (
+              <div key={f.id} className="mb-2 rounded border p-3">
+                <input
+                  value={f.question}
+                  onChange={(e) => {
+                    const arr = [...(data.faqs || [])];
+                    arr[i] = { ...arr[i], question: e.target.value };
+                    setData({ ...data, faqs: arr });
+                  }}
+                  placeholder="Question"
+                  className="w-full rounded border px-2 py-1 text-sm"
+                />
+                <textarea
+                  value={f.answer}
+                  onChange={(e) => {
+                    const arr = [...(data.faqs || [])];
+                    arr[i] = { ...arr[i], answer: e.target.value };
+                    setData({ ...data, faqs: arr });
+                  }}
+                  placeholder="Answer"
+                  rows={2}
+                  className="mt-1 w-full rounded border px-2 py-1 text-sm"
+                />
+                <button
+                  onClick={() =>
+                    setData({ ...data, faqs: (data.faqs || []).filter((_, j) => j !== i) })
+                  }
+                  className="mt-1 text-xs text-red-600 underline"
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          )}
+        </section>
+
+        {/* ── Featured Courses & Instructors ── */}
+        <section className="rounded bg-white p-5 shadow">
+          <h2 className="mb-3 font-semibold">Featured Courses & Instructors</h2>
+          <label className="block text-xs text-gray-500">
+            Featured Course IDs (comma-separated — leave empty to show newest 6)
+          </label>
+          <input
+            value={(data.featuredCourseIds || []).join(",")}
+            onChange={(e) =>
+              setData({
+                ...data,
+                featuredCourseIds: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+              })
+            }
+            placeholder="60f1234...,60f5678..."
+            className="mb-3 w-full rounded border px-3 py-2 text-sm font-mono"
+          />
+
+          <label className="block text-xs text-gray-500">
+            Featured Instructor IDs (comma-separated — leave empty to show all staff)
+          </label>
+          <input
+            value={(data.featuredInstructorIds || []).join(",")}
+            onChange={(e) =>
+              setData({
+                ...data,
+                featuredInstructorIds: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+              })
+            }
+            placeholder="60f9abc..."
+            className="w-full rounded border px-3 py-2 text-sm font-mono"
+          />
+        </section>
+
+        {/* ── Footer links ── */}
+        <section className="rounded bg-white p-5 shadow">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold">Footer Link Groups</h2>
+              <p className="text-xs text-gray-500">
+                If empty, the footer shows its built-in default links.
+              </p>
+            </div>
+            <button
+              onClick={() =>
+                setData({
+                  ...data,
+                  footerLinks: [
+                    ...(data.footerLinks || []),
+                    { title: "New Group", links: [] },
+                  ],
+                })
+              }
+              className="rounded border border-brand-600 px-3 py-1 text-xs text-brand-600"
+            >
+              + Add group
+            </button>
+          </div>
+          {(data.footerLinks || []).map((g, gi) => (
+            <div key={gi} className="mb-2 rounded border p-3">
+              <div className="flex gap-2">
+                <input
+                  value={g.title}
+                  onChange={(e) => {
+                    const arr = [...(data.footerLinks || [])];
+                    arr[gi] = { ...arr[gi], title: e.target.value };
+                    setData({ ...data, footerLinks: arr });
+                  }}
+                  placeholder="Group title (e.g. Platform)"
+                  className="flex-1 rounded border px-2 py-1 text-sm"
+                />
+                <button
+                  onClick={() =>
+                    setData({
+                      ...data,
+                      footerLinks: (data.footerLinks || []).filter((_, j) => j !== gi),
+                    })
+                  }
+                  className="text-xs text-red-600 underline"
+                >
+                  Remove group
+                </button>
+              </div>
+              {(g.links || []).map((l, li) => (
+                <div key={li} className="mt-1 flex gap-2">
+                  <input
+                    value={l.label}
+                    onChange={(e) => {
+                      const arr = [...(data.footerLinks || [])];
+                      const links = [...(arr[gi].links || [])];
+                      links[li] = { ...links[li], label: e.target.value };
+                      arr[gi] = { ...arr[gi], links };
+                      setData({ ...data, footerLinks: arr });
+                    }}
+                    placeholder="Label"
+                    className="flex-1 rounded border px-2 py-1 text-xs"
+                  />
+                  <input
+                    value={l.href}
+                    onChange={(e) => {
+                      const arr = [...(data.footerLinks || [])];
+                      const links = [...(arr[gi].links || [])];
+                      links[li] = { ...links[li], href: e.target.value };
+                      arr[gi] = { ...arr[gi], links };
+                      setData({ ...data, footerLinks: arr });
+                    }}
+                    placeholder="/path"
+                    className="flex-1 rounded border px-2 py-1 text-xs font-mono"
+                  />
+                  <button
+                    onClick={() => {
+                      const arr = [...(data.footerLinks || [])];
+                      const links = (arr[gi].links || []).filter((_, j) => j !== li);
+                      arr[gi] = { ...arr[gi], links };
+                      setData({ ...data, footerLinks: arr });
+                    }}
+                    className="text-xs text-red-600 underline"
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  const arr = [...(data.footerLinks || [])];
+                  const links = [...(arr[gi].links || []), { label: "", href: "" }];
+                  arr[gi] = { ...arr[gi], links };
+                  setData({ ...data, footerLinks: arr });
+                }}
+                className="mt-1 text-xs text-brand-600 underline"
+              >
+                + Add link
+              </button>
+            </div>
+          ))}
+        </section>
+
         {/* Publish state */}
         <section className="rounded bg-white p-5 shadow">
           <label className="flex items-center gap-2 text-sm">
