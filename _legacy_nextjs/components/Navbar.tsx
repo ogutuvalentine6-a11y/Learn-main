@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 interface NavbarProps {
-  role?: "student" | "staff" | "admin" | null;
+  role?: "student" | "staff" | "admin" | "guardian" | null;
   name?: string;
 }
 
@@ -19,6 +19,7 @@ const PUBLIC_LINKS = [
   { href: "/study-groups", label: "Study Groups" },
   { href: "/certificates", label: "Certificates" },
   { href: "/about", label: "About" },
+  { href: "/careers", label: "Careers" },
   { href: "/contact", label: "Contact" },
   { href: "/admissions", label: "Apply" },
 ];

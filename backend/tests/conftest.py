@@ -68,6 +68,13 @@ def _init_indexes():
         [("reelId", ASCENDING), ("userId", ASCENDING)], unique=True
     )
 
+    # Gamification unique constraints
+    db.points_events.create_index(
+        [("userId", 1), ("reason", 1), ("entityId", 1)], unique=True
+    )
+    db.user_badges.create_index(
+        [("userId", 1), ("badgeId", 1)], unique=True
+    )
     yield
 
     sync_client.close()

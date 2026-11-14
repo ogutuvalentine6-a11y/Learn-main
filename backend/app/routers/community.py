@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.db.mongodb import get_database
 from app.dependencies import get_current_user, require_role, write_rate_guard
+from app.services.gamification import award_badge, award_points, count_user_replies
 from app.models.community import (
     ReplyCreate,
     ReplyInDB,
@@ -88,6 +89,10 @@ async def thread_create(
         actorId=auth.id, action="thread_create",
         target=str(result.inserted_id), meta={"courseId": payload.courseId},
     )
+
+    # Gamification
+    await award_points(auth.id, "discussion_thread", str(result.inserted_id))
+    await award_badge(auth.id, "discussion_starter")
     return ThreadInDB(**doc)
 
 
@@ -245,6 +250,12 @@ async def reply_create(
         {"_id": tid},
         {"$inc": {"replyCount": 1}, "$set": {"updatedAt": now}},
     )
+
+    # Gamification — reply points, and check for the 5-reply milestone
+    await award_points(auth.id, "discussion_reply", str(result.inserted_id))
+    total_replies = await count_user_replies(auth.id)
+    if total_replies >= 5:
+        await award_badge(auth.id, "helpful_peer")
     return ReplyInDB(**doc)
 
 
