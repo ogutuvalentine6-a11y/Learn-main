@@ -9,6 +9,7 @@ from app.db.mongodb import get_database
 from app.dependencies import get_current_user, require_role
 from app.models.user import UserInDB
 from app.services.logger import log_action
+from app.services.notifier import notify_user
 
 router = APIRouter(prefix="/api/certificates", tags=["certificates"])
 
@@ -27,6 +28,21 @@ def _oid(x: str) -> ObjectId:
 def _make_certificate_id() -> str:
     year = datetime.now(timezone.utc).year
     return f"CERT-{year}-{secrets.token_hex(4).upper()}"
+
+
+async def _notify_certificate(student_id: str, course_id: str, cert_id: str) -> None:
+    try:
+        course = await get_database().courses.find_one({"_id": ObjectId(course_id)})
+        course_title = course.get("title", "your course") if course else "your course"
+        await notify_user(
+            user_id=student_id,
+            kind="certificate",
+            title="Certificate issued",
+            body=f"Your certificate for {course_title} is ready ({cert_id}).",
+            link="/student/certificates",
+        )
+    except Exception:
+        pass
 
 
 async def _is_course_complete(student_id: str, course_id: str) -> bool:
@@ -80,6 +96,7 @@ async def claim_certificate(
             detail="Course not yet complete — pass every session first",
         )
     cert = await _issue(auth.id, course_id, issued_by=auth.id)
+    await _notify_certificate(auth.id, course_id, cert["certificateId"])
     return {
         "certificateId": cert["certificateId"],
         "issuedAt": cert.get("issuedAt"),
@@ -100,6 +117,7 @@ async def admin_issue(
         raise HTTPException(status_code=404, detail="Course not found")
 
     cert = await _issue(studentId, courseId, issued_by=auth.id)
+    await _notify_certificate(studentId, courseId, cert["certificateId"])
     return {
         "certificateId": cert["certificateId"],
         "issuedAt": cert.get("issuedAt"),

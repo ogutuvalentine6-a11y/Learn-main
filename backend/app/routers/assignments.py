@@ -15,6 +15,7 @@ from app.models.assignment import (
 )
 from app.models.user import UserInDB
 from app.services.logger import log_action
+from app.services.notifier import notify_course_students, notify_user
 
 router = APIRouter(prefix="/api/assignments", tags=["assignments"])
 
@@ -77,6 +78,17 @@ async def assignment_create(
     await log_action(
         actorId=auth.id, action="assignment_create",
         target=str(result.inserted_id), meta={"courseId": payload.courseId},
+    )
+
+    due = ""
+    if payload.dueAt:
+        due = f" — due {payload.dueAt.strftime('%Y-%m-%d')}"
+    await notify_course_students(
+        course_id=payload.courseId,
+        kind="assignment",
+        title=f"New assignment: {payload.title}",
+        body=f"{auth.fullName} posted a new assignment{due}.",
+        link=f"/assignments/{result.inserted_id}",
     )
     return AssignmentInDB(**doc)
 
@@ -262,5 +274,16 @@ async def submission_grade(
             "gradedAt": _utcnow(),
         }},
         return_document=True,
+    )
+
+    await notify_user(
+        user_id=str(s["studentId"]),
+        kind="grade",
+        title=f"Your submission was graded: {a['title']}",
+        body=(
+            f"Score: {payload.score}/{a['maxScore']}."
+            + (f" Feedback: {payload.feedback[:100]}" if payload.feedback else "")
+        ),
+        link=f"/assignments/{a['_id']}",
     )
     return SubmissionInDB(**updated)

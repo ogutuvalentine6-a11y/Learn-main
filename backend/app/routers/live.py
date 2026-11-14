@@ -16,6 +16,7 @@ from app.models.live import (
 )
 from app.models.user import UserInDB
 from app.services.logger import log_action
+from app.services.notifier import notify_course_students
 
 router = APIRouter(prefix="/api/live", tags=["live"])
 settings = get_settings()
@@ -130,6 +131,17 @@ async def session_create(
         actorId=auth.id, action="live_session_create",
         target=str(result.inserted_id), meta={"title": payload.title},
     )
+
+    # Notify enrolled students if the session is course-scoped
+    if payload.courseId:
+        when = payload.scheduledAt.strftime("%Y-%m-%d %H:%M UTC")
+        await notify_course_students(
+            course_id=payload.courseId,
+            kind="live",
+            title=f"Live class scheduled: {payload.title}",
+            body=f"{auth.fullName} scheduled a live class on {when}.",
+            link=f"/live/sessions/{result.inserted_id}",
+        )
     return LiveSessionInDB(**doc)
 
 

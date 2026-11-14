@@ -12,6 +12,7 @@ from app.models.payment import PaymentInDB
 from app.models.user import UserInDB
 from app.services import paystack_service as paystack
 from app.services.logger import log_action
+from app.services.notifier import notify_user
 
 router = APIRouter(prefix="/api", tags=["payments"])
 settings = get_settings()
@@ -144,6 +145,16 @@ async def paystack_verify(
         },
         upsert=True,
     )
+
+    course = await db.courses.find_one({"_id": payment["courseId"]})
+    course_title = course.get("title", "your course") if course else "your course"
+    await notify_user(
+        user_id=auth.id,
+        kind="payment",
+        title="Payment confirmed",
+        body=f"You are now enrolled in {course_title}.",
+        link="/student/dashboard",
+    )
     return {"ok": True}
 
 
@@ -194,5 +205,15 @@ async def paystack_webhook(request: Request):
             }
         },
         upsert=True,
+    )
+
+    course = await db.courses.find_one({"_id": ObjectId(metadata["courseId"])})
+    course_title = course.get("title", "your course") if course else "your course"
+    await notify_user(
+        user_id=metadata["studentId"],
+        kind="payment",
+        title="Payment confirmed",
+        body=f"You are now enrolled in {course_title}.",
+        link="/student/dashboard",
     )
     return {"ok": True}
