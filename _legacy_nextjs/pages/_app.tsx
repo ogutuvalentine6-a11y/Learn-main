@@ -68,6 +68,21 @@ function shellFor(pathname: string): NavItem[] | null {
   return null;
 }
 
+// Dashboard pages get the softer blue surface; learning surfaces get the
+// workspace tint. Everything else stays on the main app background.
+function backgroundFor(pathname: string): "default" | "dashboard" | "workspace" {
+  if (
+    pathname.endsWith("/dashboard") ||
+    pathname === "/student" || pathname === "/staff" || pathname === "/admin"
+  ) return "dashboard";
+  if (
+    pathname.startsWith("/student/course-view") ||
+    pathname.startsWith("/student/session")     ||
+    pathname.startsWith("/live/sessions")
+  ) return "workspace";
+  return "default";
+}
+
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -80,11 +95,12 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const { pathname } = useRouter();
   const nav = shellFor(pathname);
+  const bg  = backgroundFor(pathname);
 
   return (
     <LanguageProvider>
       {nav ? (
-        <AppShell nav={nav}>
+        <AppShell nav={nav} backgroundVariant={bg}>
           <Component {...pageProps} />
         </AppShell>
       ) : (

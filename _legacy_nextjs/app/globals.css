@@ -3,13 +3,46 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Backgrounds — mirror tailwind.config.ts for any inline CSS usage */
+    --background:           #F5F8FF;
+    --background-dashboard: #EEF4FF;
+    --background-workspace: #F8FAFF;
+    --background-important: #E5EEFF;
+
+    /* Surfaces */
+    --surface:           #FFFFFF;
+    --surface-secondary: #F1F5F9;
+
+    /* Brand */
+    --primary:      #356AE6;
+    --primary-dark: #17365D;
+    --primary-soft: #E5EEFF;
+
+    /* Text */
+    --text-primary:   #172B4D;
+    --text-secondary: #64748B;
+
+    /* Border */
+    --border: #E2E8F0;
+
+    /* Status */
+    --success: #16A34A;
+    --warning: #D97706;
+    --danger:  #DC2626;
+    --info:    #0891B2;
+
+    /* Footer */
+    --footer: #17365D;
+  }
+
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   html, body { overflow-x: hidden; }
   html, body, #__next { height: 100%; margin: 0; padding: 0; }
 
   body {
-    background-color: #F8FAFC;
-    color: #172033;
+    background-color: var(--background);
+    color: var(--text-primary);
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -33,7 +66,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #2563EB;
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
     border-radius: 6px;
   }

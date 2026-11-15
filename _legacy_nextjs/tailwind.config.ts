@@ -9,28 +9,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // --brand-* : one hue family, 9 steps. Reskin by editing this block only.
         brand: {
-          50:  "#EFF6FF",
+          50:  "#EEF4FF",  // Soft Academic Blue
           100: "#DBEAFE",
           200: "#BFDBFE",
           300: "#93C5FD",
-          400: "#60A5FA",
-          500: "#3B82F6",
-          600: "#2563EB",
-          700: "#1D4ED8",
-          800: "#14213D",
-          900: "#0B1733",
+          400: "#7BA3E8",
+          500: "#4F80E8",
+          600: "#356AE6",  // Professional Blue — buttons, links, active state
+          700: "#2C56C2",  // hover
+          800: "#17365D",  // Deep Academic Navy — headings on light, dark panels
+          900: "#0F2647",  // deepest navy
         },
-        bg: "#F8FAFC",
+        // --bg-* : page-level backgrounds. Use intent, not hex.
+        bg: {
+          DEFAULT:    "#F5F8FF",  // main app background
+          dashboard:  "#EEF4FF",  // dashboard body
+          workspace:  "#F8FAFF",  // learning workspace (course-view, video)
+          important:  "#E5EEFF",  // callout / emphasis section
+        },
+        // --surface-* : card / panel / nav surfaces (always light in this theme)
         surface: { DEFAULT: "#FFFFFF", 2: "#F1F5F9" },
+        // --footer : deep navy band
+        footer: "#17365D",
+        // --border
         border: "#E2E8F0",
+        // --text-*
         fg: {
-          DEFAULT: "#172033",
+          DEFAULT: "#172B4D",
           muted:   "#64748B",
           subtle:  "#94A3B8",
         },
+        // --status-*
         success: "#16A34A",
-        warning: "#F59E0B",
+        warning: "#D97706",
         error:   "#DC2626",
         info:    "#0891B2",
       },
