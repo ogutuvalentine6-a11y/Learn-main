@@ -1,385 +1,517 @@
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { useTranslation } from "@/contexts/LanguageContext";
+import { useState } from "react";
 
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  price: number;
-}
+const navigation = [
+  {
+    title: "Learn",
+    links: [
+      { label: "Explore Courses", href: "/courses", description: "Browse available courses" },
+      { label: "Instructors", href: "/instructors", description: "Meet the teaching team" },
+      { label: "Live Learning", href: "/live", description: "Live classes and sessions" },
+      { label: "Study Groups", href: "/study-groups", description: "Learn with other students" },
+    ],
+  },
+  {
+    title: "Academic",
+    links: [
+      { label: "Admissions", href: "/admissions", description: "Start your enrolment journey" },
+      { label: "Academic Calendar", href: "/academic-calendar", description: "Important academic dates" },
+      { label: "Events", href: "/events", description: "Upcoming learning events" },
+      { label: "Assignments", href: "/assignments", description: "Learning tasks and submissions" },
+    ],
+  },
+  {
+    title: "Community",
+    links: [
+      { label: "Discussions", href: "/discussions", description: "Share ideas and ask questions" },
+      { label: "Resources", href: "/resources", description: "Learning materials and resources" },
+      { label: "Careers", href: "/careers", description: "Explore career opportunities" },
+      { label: "About Us", href: "/about", description: "Discover our platform" },
+    ],
+  },
+];
 
-interface Stats {
-  students: number;
-  instructors: number;
-  courses: number;
-  enrollments: number;
-}
+const highlights = [
+  {
+    number: "01",
+    title: "Structured learning",
+    description: "Follow organised courses, lessons and learning materials designed to make your academic journey clearer.",
+    image: "/images/education/classroom-learning.jpg",
+    alt: "Students participating in a classroom learning session",
+  },
+  {
+    number: "02",
+    title: "Learn collaboratively",
+    description: "Connect with other learners, participate in discussions and build knowledge through shared experiences.",
+    image: "/images/education/collaborative-learning.jpg",
+    alt: "Students collaborating on learning activities",
+  },
+  {
+    number: "03",
+    title: "Guidance from instructors",
+    description: "Access academic guidance, instructor support, assignments and feedback throughout your studies.",
+    image: "/images/education/teacher-guiding-students.jpg",
+    alt: "An instructor guiding students",
+  },
+];
 
-interface HomepageContent {
-  hero: { title: string; subtitle: string; badgeText: string; primaryCtaLabel: string; primaryCtaHref: string; secondaryCtaLabel: string; secondaryCtaHref: string; };
-  heroSlides?: { id: string; title: string; subtitle: string; imageUrl: string; ctaLabel: string; ctaHref: string; active: boolean }[];
-  founder: { name: string; role: string; bio: string; githubUrl: string; };
-  cta: { title: string; subtitle: string; primaryLabel: string; primaryHref: string; secondaryLabel: string; secondaryHref: string; };
-  announcements: { id: string; text: string; link: string; active: boolean }[];
-  testimonials?: { id: string; name: string; role: string; quote: string; avatarUrl: string; approved: boolean }[];
-  faqs?: { id: string; question: string; answer: string }[];
-  footerLinks?: { title: string; links: { label: string; href: string }[] }[];
-  featuredCourseIds?: string[];
-  featuredInstructorIds?: string[];
-}
+const capabilities = [
+  {
+    icon: "▤",
+    title: "Courses and programmes",
+    description: "Explore organised learning content, course materials and academic programmes.",
+    href: "/courses",
+  },
+  {
+    icon: "✓",
+    title: "Assignments and assessments",
+    description: "Access assignments, quizzes and assessment activities in one learning environment.",
+    href: "/assignments",
+  },
+  {
+    icon: "◷",
+    title: "Academic schedules",
+    description: "Keep track of academic dates, events, timetables and learning sessions.",
+    href: "/academic-calendar",
+  },
+  {
+    icon: "◎",
+    title: "Learning community",
+    description: "Participate in discussions, study groups and collaborative learning activities.",
+    href: "/discussions",
+  },
+  {
+    icon: "▣",
+    title: "Learning resources",
+    description: "Find useful study materials and resources to support your learning.",
+    href: "/resources",
+  },
+  {
+    icon: "▥",
+    title: "Progress and achievement",
+    description: "Use your student workspace to access learning progress and achievements.",
+    href: "/login",
+  },
+];
 
 export default function Home() {
-  const { t } = useTranslation();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [home, setHome] = useState<HomepageContent | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/course-list").then((r) => (r.ok ? r.json() : [])),
-      fetch("/api/public-stats").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/homepage-content").then((r) => (r.ok ? r.json() : null)).catch(() => null),
-    ])
-      .then(([c, s, h]) => {
-        setCourses(Array.isArray(c) ? c.slice(0, 6) : []);
-        setStats(s);
-        setHome(h);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <Navbar />
+    <div className="min-h-screen bg-white text-slate-900">
+      {/* Announcement */}
+      <div className="bg-slate-950 px-4 py-2.5 text-center text-sm text-white">
+        <span className="font-semibold text-blue-300">Learn Education</span>
+        <span className="mx-2 text-slate-500">|</span>
+        A connected environment for teaching, learning and academic growth.
+        <Link href="/courses" className="ml-2 font-semibold text-blue-300 hover:text-white">
+          Explore courses →
+        </Link>
+      </div>
 
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-b from-brand-50 to-white">
-        <div className="mx-auto max-w-7xl px-6 py-20 text-center md:py-28">
-          <span className="inline-block rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700">
-            {home?.hero.badgeText ?? t("home.hero.badge")}
-          </span>
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 md:text-6xl">
-            {home?.heroSlides?.filter((s) => s.active)[0]?.title ?? home?.hero.title ?? t("home.hero.title")}
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-            {home?.heroSlides?.filter((s) => s.active)[0]?.subtitle ?? home?.hero.subtitle ?? t("home.hero.subtitle")}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/register"
-              className="rounded-lg bg-brand-600 px-6 py-3 text-white shadow-sm hover:bg-brand-700"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/courses"
-              className="rounded-lg border border-gray-300 px-6 py-3 text-gray-700 hover:border-brand-600 hover:text-brand-600"
-            >
-              Explore Courses
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── STATS ────────────────────────────────────────────── */}
-      <section className="border-y bg-gray-50">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
-          {[
-            { label: t("home.stats.students"), value: stats?.students },
-            { label: t("home.stats.courses"), value: stats?.courses },
-            { label: t("home.stats.instructors"), value: stats?.instructors },
-            { label: t("home.stats.enrollments"), value: stats?.enrollments },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-3xl font-bold text-brand-600">
-                {s.value === undefined || s.value === null
-                  ? loading
-                    ? "…"
-                    : "—"
-                  : s.value.toLocaleString()}
-              </p>
-              <p className="mt-1 text-sm text-gray-600">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── FEATURED COURSES ─────────────────────────────────── */}
-      <section id="courses" className="mx-auto max-w-7xl px-6 py-20">
-        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">{t("home.courses.heading")}</h2>
-            <p className="mt-2 text-gray-600">
-              {t("home.courses.subtitle")}
-            </p>
-          </div>
-          <Link
-            href="/login"
-            className="text-sm font-medium text-brand-600 hover:underline"
-          >
-            Sign in to enroll →
+      {/* Main navigation */}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+        <div className="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="Learn home">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700 text-xl font-black text-white">
+              L
+            </span>
+            <span>
+              <span className="block text-xl font-extrabold tracking-tight text-slate-950">
+                Learn<span className="text-blue-700">.</span>
+              </span>
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Education platform
+              </span>
+            </span>
           </Link>
-        </div>
 
-        {loading ? (
-          <p className="mt-10 text-center text-gray-500">Loading courses…</p>
-        ) : courses.length === 0 ? (
-          <div className="mt-10 rounded-lg border border-dashed p-10 text-center text-gray-500">
-            {t("home.courses.empty")}
-          </div>
-        ) : (
-          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((c) => (
-              <div
-                key={c._id}
-                className="flex flex-col rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md"
-              >
-                <div className="mb-4 flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-brand-100 to-brand-50 text-2xl font-bold text-brand-600">
-                  {c.title.charAt(0)}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">{c.title}</h3>
-                <p className="mt-2 flex-1 text-sm text-gray-600">
-                  {c.description}
-                </p>
-                <div className="mt-4 flex items-center justify-between border-t pt-4">
-                  <span className="text-lg font-bold text-brand-600">
-                    {c.price > 0 ? `NGN ${c.price.toLocaleString()}` : "Free"}
-                  </span>
-                  <Link
-                    href="/login"
-                    className="rounded-md bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700"
-                  >
-                    Enroll
-                  </Link>
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+            <Link href="/" className="rounded-lg px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50">
+              Home
+            </Link>
+
+            {navigation.map((group) => (
+              <div key={group.title} className="group relative">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-blue-700"
+                  aria-haspopup="true"
+                >
+                  {group.title}
+                  <span className="text-xs">⌄</span>
+                </button>
+
+                <div className="invisible absolute left-0 top-full z-50 w-80 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                  {group.links.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block rounded-xl px-4 py-3 hover:bg-blue-50"
+                    >
+                      <span className="block text-sm font-bold text-slate-800">{item.label}</span>
+                      <span className="mt-1 block text-xs text-slate-500">{item.description}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             ))}
-          </div>
-        )}
-      </section>
 
-      {/* ── FOUNDER ──────────────────────────────────────────── */}
-      <section id="about" className="bg-gray-50 py-20">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 md:grid-cols-[auto,1fr] md:items-center">
-          <div className="flex justify-center">
-            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-brand-600 text-5xl font-bold text-white shadow-lg">
-              VO
-            </div>
+            <Link href="/contact" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-blue-700">
+              Contact
+            </Link>
+          </nav>
+
+          <div className="hidden items-center gap-3 lg:flex">
+            <Link href="/login" className="rounded-lg px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-100">
+              Sign in
+            </Link>
+            <Link href="/register" className="rounded-lg bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800">
+              Create account <span aria-hidden="true">→</span>
+            </Link>
           </div>
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">
-              Meet the Founder
-            </p>
-            <h2 className="mt-2 text-3xl font-bold text-gray-900">
-              {home?.founder.name ?? "Valentine Otieno Ogutu"}
-            </h2>
-            <p className="mt-1 text-gray-600">
-              {home?.founder.role ?? "Software Engineer · Founder, Learn"}
-            </p>
-            <p className="mt-6 max-w-2xl text-gray-700">
-              Learn was built on a simple belief: quality education should be
-              accessible, honest, and engineered to last. Every course, every
-              dashboard, and every integration on this platform was designed
-              and built by Valentine — a full-stack engineer who cares as much
-              about clean code as he does about a clean user experience.
-            </p>
-            <p className="mt-4 max-w-2xl text-gray-700">
-              The stack:{" "}
-              <span className="font-medium">Python + FastAPI</span> for the
-              backend,{" "}
-              <span className="font-medium">Next.js + TypeScript</span> for the
-              frontend,{" "}
-              <span className="font-medium">MongoDB</span> for data, and
-              production integrations with{" "}
-              <span className="font-medium">Paystack</span>,{" "}
-              <span className="font-medium">Cloudinary</span>, and{" "}
-              <span className="font-medium">Resend</span>.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={home?.founder.githubUrl ?? "https://github.com/ogutuvalentine6-a11y"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-gray-900 px-5 py-2.5 text-white hover:bg-black"
-              >
-                View on GitHub
-              </a>
-              <Link
-                href="/register"
-                className="rounded-lg border border-brand-600 px-5 py-2.5 text-brand-600 hover:bg-brand-50"
-              >
-                Start Learning
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 text-2xl text-slate-800 hover:bg-slate-100 lg:hidden"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? "×" : "☰"}
+          </button>
+        </div>
+
+        {/* Mobile navigation */}
+        {mobileMenuOpen && (
+          <nav className="max-h-[75vh] overflow-y-auto border-t border-slate-200 bg-white px-4 py-5 lg:hidden" aria-label="Mobile navigation">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg px-3 py-3 font-bold text-blue-700 hover:bg-blue-50"
+            >
+              Home
+            </Link>
+
+            {navigation.map((group) => (
+              <details key={group.title} className="border-b border-slate-100 py-2">
+                <summary className="cursor-pointer list-none rounded-lg px-3 py-3 font-bold text-slate-800 hover:bg-slate-50">
+                  {group.title}
+                  <span className="float-right text-slate-400">＋</span>
+                </summary>
+                <div className="pb-2 pl-3">
+                  {group.links.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block rounded-lg px-3 py-3 text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            ))}
+
+            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-3 font-semibold text-slate-700 hover:bg-slate-50">
+              Contact
+            </Link>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-bold text-slate-800">
+                Sign in
+              </Link>
+              <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="rounded-lg bg-blue-700 px-4 py-3 text-center text-sm font-bold text-white">
+                Register
               </Link>
             </div>
+          </nav>
+        )}
+      </header>
+
+      <main>
+        {/* Hero */}
+        <section className="relative isolate overflow-hidden bg-slate-950">
+          <div className="absolute inset-0 -z-10">
+            <img
+              src="/images/education/classroom-learning.jpg"
+              alt=""
+              className="h-full w-full object-cover opacity-35"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/35" />
           </div>
-        </div>
-      </section>
 
-      {/* ── FEATURES ─────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <h2 className="text-center text-3xl font-bold text-gray-900">
-          Everything you need to learn
-        </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-gray-600">
-          A platform built for students, instructors, and administrators —
-          each with their own dedicated workspace.
-        </p>
+          <div className="mx-auto grid min-h-[590px] max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-28">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center rounded-full border border-blue-300/30 bg-blue-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-200">
+                A connected learning experience
+              </span>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[
-            {
-              title: "Structured Courses",
-              body: "Ordered sessions, learning materials, and clear progress through every course.",
-            },
-            {
-              title: "Quizzes & Assessments",
-              body: "Timed quizzes with server-enforced limits, grading, and pass marks.",
-            },
-            {
-              title: "Submission Review",
-              body: "Upload files, get reviewed by staff, and receive feedback on every submission.",
-            },
-            {
-              title: "Progress Tracking",
-              body: "Session-by-session status: locked, in progress, passed, or awaiting review.",
-            },
-            {
-              title: "Secure Payments",
-              body: "Paystack integration with webhook verification and idempotent transaction handling.",
-            },
-            {
-              title: "Role-Based Access",
-              body: "Students, staff, and admins each see only what they should — enforced on the backend.",
-            },
-          ].map((f) => (
-            <div
-              key={f.title}
-              className="rounded-xl border bg-white p-6 shadow-sm"
-            >
-              <h3 className="text-lg font-semibold text-gray-900">{f.title}</h3>
-              <p className="mt-2 text-sm text-gray-600">{f.body}</p>
+              <h1 className="mt-7 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+                Learn with purpose.
+                <span className="mt-2 block text-blue-300">Grow with confidence.</span>
+              </h1>
+
+              <p className="mt-7 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
+                Discover courses, connect with instructors, participate in assessments
+                and access the academic tools you need — all through one organised
+                learning platform.
+              </p>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Link href="/courses" className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-7 py-4 font-bold text-white shadow-lg transition hover:bg-blue-500">
+                  Explore courses <span className="ml-3">→</span>
+                </Link>
+                <Link href="/register" className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-7 py-4 font-bold text-white transition hover:bg-white/20">
+                  Create your account
+                </Link>
+              </div>
+
+              <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-slate-300">
+                <span>✓ Organised courses</span>
+                <span>✓ Academic support</span>
+                <span>✓ Flexible access</span>
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* ── TESTIMONIALS (only approved) ─────────────────────── */}
-      {(home?.testimonials || []).filter((t) => t.approved).length > 0 && (
-        <section className="bg-white py-20">
-          <div className="mx-auto max-w-7xl px-6">
-            <h2 className="text-center text-3xl font-bold text-gray-900">
-              What learners say
+            <div className="relative hidden lg:block">
+              <div className="absolute -inset-5 rounded-[2rem] border border-blue-300/20" />
+              <img
+                src="/images/education/classroom-lecture.jpg"
+                alt="A classroom lecture in progress"
+                className="relative h-[420px] w-full rounded-[1.5rem] object-cover shadow-2xl"
+              />
+              <div className="absolute -bottom-7 -left-8 max-w-xs rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
+                <p className="text-xs font-bold uppercase tracking-widest text-blue-700">Your learning space</p>
+                <p className="mt-2 text-lg font-extrabold text-slate-900">One platform. Many possibilities.</p>
+                <p className="mt-1 text-sm text-slate-500">Learn, participate and make progress.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Platform introduction */}
+        <section className="border-b border-slate-200 bg-white py-16 sm:py-20">
+          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+            <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Designed for learning</p>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+              Everything you need for a more connected academic journey
             </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-gray-600">
-              Real stories from real students and instructors on Learn.
+            <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-600">
+              Learn brings academic content, learning activities, communication and
+              student services into a single digital environment for students,
+              instructors and administrators.
             </p>
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {(home?.testimonials || []).filter((t) => t.approved).map((t) => (
-                <blockquote key={t.id} className="rounded-xl border bg-white p-6 shadow-sm">
-                  <p className="text-gray-700">"{t.quote}"</p>
-                  <footer className="mt-4 border-t pt-4">
-                    <p className="font-semibold text-gray-900">{t.name}</p>
-                    {t.role && <p className="text-sm text-gray-500">{t.role}</p>}
-                  </footer>
-                </blockquote>
+          </div>
+        </section>
+
+        {/* Learning highlights */}
+        <section className="bg-slate-50 py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+              <div>
+                <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">The learning experience</p>
+                <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                  Learning that moves you forward
+                </h2>
+              </div>
+              <Link href="/courses" className="font-bold text-blue-700 hover:text-blue-900">
+                Discover learning opportunities →
+              </Link>
+            </div>
+
+            <div className="mt-10 grid gap-7 md:grid-cols-3">
+              {highlights.map((item) => (
+                <article key={item.number} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+                  <div className="relative h-56 overflow-hidden">
+                    <img src={item.image} alt={item.alt} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
+                    <span className="absolute left-4 top-4 rounded-lg bg-white px-3 py-2 text-xs font-black text-blue-700 shadow">
+                      {item.number}
+                    </span>
+                  </div>
+                  <div className="p-7">
+                    <h3 className="text-xl font-extrabold text-slate-950">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
         </section>
-      )}
 
-      {/* ── FAQ ──────────────────────────────────────────────── */}
-      <section className="bg-gray-50 py-20">
-        <div className="mx-auto max-w-3xl px-6">
-          <h2 className="text-center text-3xl font-bold text-gray-900">
-            Frequently asked questions
-          </h2>
-          <div className="mt-10 space-y-3">
-            {(home?.faqs && home.faqs.length > 0
-              ? home.faqs.map((f) => ({ q: f.question, a: f.answer }))
-              : [
-                  {
-                    q: "How do I create an account?",
-                    a: "Click Get Started at the top of the page. Fill in the registration form — ID number, full name, email, phone, and a few details about your school and course. Then log in.",
-                  },
-                  {
-                    q: "How do I enroll in a course?",
-                    a: "Browse the courses on this page. Sign in, open a course, and click Enroll. Complete payment via Paystack if the course has a price, and you'll have immediate access to every session.",
-                  },
-                  {
-                    q: "Are the courses free?",
-                    a: "Some are. Each course shows its price on the listing. Courses marked Free require no payment to enroll.",
-                  },
-                  {
-                    q: "Can instructors create their own courses?",
-                    a: "Instructors (staff role) can manage sessions and quizzes for the courses they've been assigned to by an administrator. Course creation is restricted to administrators.",
-                  },
-                  {
-                    q: "Is my data secure?",
-                    a: "Yes. Passwords are hashed with bcrypt (12 rounds), sessions use HTTP-only cookies with SameSite protection, and every protected endpoint enforces role-based authorization on the backend.",
-                  },
-                ]
-            ).map((item) => (
-              <details
-                key={item.q}
-                className="rounded-lg border bg-white p-5 shadow-sm"
-              >
-                <summary className="cursor-pointer font-medium text-gray-900">
-                  {item.q}
-                </summary>
-                <p className="mt-3 text-sm text-gray-600">{item.a}</p>
-              </details>
-            ))}
+        {/* Platform capabilities */}
+        <section className="bg-white py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Platform capabilities</p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                Your academic tools, connected
+              </h2>
+              <p className="mt-4 leading-8 text-slate-600">
+                Access the key areas of the platform from one clear starting point.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {capabilities.map((item) => (
+                <Link key={item.title} href={item.href} className="group rounded-2xl border border-slate-200 bg-white p-7 transition hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-lg">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-2xl font-bold text-blue-700 transition group-hover:bg-blue-700 group-hover:text-white">
+                    {item.icon}
+                  </span>
+                  <h3 className="mt-5 text-lg font-extrabold text-slate-950">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+                  <span className="mt-5 inline-flex font-bold text-blue-700">
+                    Explore <span className="ml-2 transition group-hover:translate-x-1">→</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Instructor section */}
+        <section className="overflow-hidden bg-slate-950 py-20">
+          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+            <div className="overflow-hidden rounded-2xl">
+              <img
+                src="/images/education/teacher-guiding-students.jpg"
+                alt="An instructor supporting students during learning"
+                className="h-[380px] w-full object-cover"
+              />
+            </div>
+            <div>
+              <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-300">Teaching and support</p>
+              <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl">
+                Better learning happens with the right guidance.
+              </h2>
+              <p className="mt-5 leading-8 text-slate-300">
+                Learning is more than reading materials. It involves asking questions,
+                receiving feedback, practising new skills and connecting with people
+                who can support your academic development.
+              </p>
+              <div className="mt-8 space-y-4 text-sm font-medium text-slate-200">
+                <p>✓ Instructor-led learning and academic guidance</p>
+                <p>✓ Assignments, quizzes and learning activities</p>
+                <p>✓ Discussions and collaborative study spaces</p>
+                <p>✓ Access to academic information and resources</p>
+              </div>
+              <Link href="/instructors" className="mt-9 inline-flex rounded-xl bg-blue-600 px-6 py-3.5 font-bold text-white transition hover:bg-blue-500">
+                Meet the instructors →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Community */}
+        <section className="bg-blue-50 py-20">
+          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+            <div>
+              <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Learning community</p>
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                Learning is stronger when we learn together.
+              </h2>
+              <p className="mt-5 leading-8 text-slate-600">
+                Join academic conversations, explore study groups, participate in
+                learning events and exchange ideas with the wider learning community.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/discussions" className="rounded-xl bg-blue-700 px-6 py-3.5 font-bold text-white hover:bg-blue-800">
+                  Join discussions
+                </Link>
+                <Link href="/study-groups" className="rounded-xl border border-blue-200 bg-white px-6 py-3.5 font-bold text-blue-800 hover:bg-blue-100">
+                  Explore study groups
+                </Link>
+              </div>
+            </div>
+            <img
+              src="/images/education/library-study-support.jpg"
+              alt="Students studying in a library"
+              className="h-[340px] w-full rounded-2xl object-cover shadow-lg"
+            />
+          </div>
+        </section>
+
+        {/* Final call to action */}
+        <section className="bg-white px-4 py-20 text-center">
+          <div className="mx-auto max-w-4xl">
+            <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Get started</p>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+              Take the next step in your learning journey.
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl leading-8 text-slate-600">
+              Explore the platform, discover learning opportunities and create an
+              account to access your learning workspace.
+            </p>
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/register" className="rounded-xl bg-blue-700 px-8 py-4 font-bold text-white shadow hover:bg-blue-800">
+                Create an account →
+              </Link>
+              <Link href="/login" className="rounded-xl border border-slate-300 px-8 py-4 font-bold text-slate-800 hover:bg-slate-50">
+                Sign in to Learn
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer navigation */}
+      <footer className="bg-slate-950 text-slate-300">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <Link href="/" className="text-2xl font-black text-white">
+                Learn<span className="text-blue-400">.</span>
+              </Link>
+              <p className="mt-4 max-w-xs text-sm leading-7 text-slate-400">
+                A connected digital environment for teaching, learning and academic growth.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-extrabold text-white">Learning</h3>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li><Link href="/courses" className="hover:text-blue-300">Courses</Link></li>
+                <li><Link href="/instructors" className="hover:text-blue-300">Instructors</Link></li>
+                <li><Link href="/assignments" className="hover:text-blue-300">Assignments</Link></li>
+                <li><Link href="/quizzes" className="hover:text-blue-300">Quizzes</Link></li>
+                <li><Link href="/resources" className="hover:text-blue-300">Resources</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-extrabold text-white">Community</h3>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li><Link href="/discussions" className="hover:text-blue-300">Discussions</Link></li>
+                <li><Link href="/study-groups" className="hover:text-blue-300">Study groups</Link></li>
+                <li><Link href="/events" className="hover:text-blue-300">Events</Link></li>
+                <li><Link href="/live" className="hover:text-blue-300">Live learning</Link></li>
+                <li><Link href="/careers" className="hover:text-blue-300">Careers</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-extrabold text-white">Information</h3>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li><Link href="/about" className="hover:text-blue-300">About Learn</Link></li>
+                <li><Link href="/admissions" className="hover:text-blue-300">Admissions</Link></li>
+                <li><Link href="/academic-calendar" className="hover:text-blue-300">Academic calendar</Link></li>
+                <li><Link href="/contact" className="hover:text-blue-300">Contact</Link></li>
+                <li><Link href="/login" className="hover:text-blue-300">Student sign in</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 flex flex-col gap-4 border-t border-slate-800 pt-7 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} Learn Education Platform. All rights reserved.</p>
+            <div className="flex gap-5">
+              <Link href="/about" className="hover:text-white">About</Link>
+              <Link href="/contact" className="hover:text-white">Contact</Link>
+              <Link href="/login" className="hover:text-white">Account</Link>
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* ── CONTACT ──────────────────────────────────────────── */}
-      <section id="contact" className="mx-auto max-w-3xl px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Get in touch</h2>
-        <p className="mt-3 text-gray-600">
-          Questions, ideas, or feedback? The fastest way to reach the founder is
-          on GitHub.
-        </p>
-        <a
-          href="https://github.com/ogutuvalentine6-a11y"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-6 inline-block rounded-lg bg-gray-900 px-6 py-3 text-white hover:bg-black"
-        >
-          github.com/ogutuvalentine6-a11y
-        </a>
-      </section>
-
-      {/* ── CTA ──────────────────────────────────────────────── */}
-      <section className="bg-brand-600 py-16">
-        <div className="mx-auto max-w-4xl px-6 text-center text-white">
-          <h2 className="text-3xl font-bold">{home?.cta.title ?? "Ready to start learning?"}</h2>
-          <p className="mt-3 text-brand-100">
-            {home?.cta.subtitle ?? "Join a platform built for real progress — not just pretty pages."}
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/register"
-              className="rounded-lg bg-white px-6 py-3 font-medium text-brand-700 hover:bg-brand-50"
-            >
-              Create your account
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-lg border border-white px-6 py-3 font-medium text-white hover:bg-brand-700"
-            >
-              I already have one
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <Footer groups={home?.footerLinks} />
+      </footer>
     </div>
   );
 }

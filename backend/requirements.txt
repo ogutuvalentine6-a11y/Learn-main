@@ -16,3 +16,4 @@ redis>=5.0.0
 # ── Test suite (Phase 9) ──
 pytest==8.3.4
 pytest-asyncio==0.24.0
+certifi

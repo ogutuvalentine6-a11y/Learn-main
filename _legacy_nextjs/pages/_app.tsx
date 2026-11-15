@@ -1,6 +1,7 @@
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import { Toaster } from "react-hot-toast";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import InstallPrompt from "@/components/InstallPrompt";
@@ -99,6 +100,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <LanguageProvider>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </Head>
       {nav ? (
         <AppShell nav={nav} backgroundVariant={bg}>
           <Component {...pageProps} />
