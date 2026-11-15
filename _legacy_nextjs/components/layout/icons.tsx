@@ -56,3 +56,11 @@ export const ShieldIcon    = ({ size, className }: IconProps) => (
 export const VideoIcon     = ({ size, className }: IconProps) => (
   <svg {...p(size)} className={className}><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4z"/></svg>
 );
+
+export const SearchIcon = ({ size, className }: IconProps) => (
+  <svg {...p(size)} className={className}><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+);
+
+export const ClockIcon = ({ size, className }: IconProps) => (
+  <svg {...p(size)} className={className}><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+);
