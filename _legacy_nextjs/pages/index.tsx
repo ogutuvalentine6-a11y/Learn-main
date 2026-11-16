@@ -21,6 +21,27 @@ interface Course {
   instructorName?: string;
 }
 
+interface Reel {
+  _id: string;
+  title?: string;
+  caption?: string;
+  thumbnailUrl?: string;
+  thumbnail?: string;
+  videoUrl?: string;
+  category?: string;
+  duration?: number;
+}
+
+interface Resource {
+  _id: string;
+  title?: string;
+  fileName?: string;
+  fileType?: string;
+  mimeType?: string;
+  size?: number;
+}
+
+
 interface Founder {
   name?: string;
   role?: string;
@@ -61,6 +82,11 @@ export default function Home() {
   const [stats, setStats] = useState<PublicStats | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [cms, setCms] = useState<HomepageCMS | null>(null);
+  const [reels, setReels] = useState<Reel[]>([]);
+  const [reelsLoading, setReelsLoading] = useState(true);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [resourcesLoading, setResourcesLoading] = useState(true);
+
   const [loadingCourses, setLoadingCourses] = useState(true);
 
   useEffect(() => {
@@ -81,6 +107,26 @@ export default function Home() {
         }
       })
       .catch(() => { if (!cancelled) setLoadingCourses(false); });
+
+    fetch("/api/reels")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => {
+        if (!cancelled) {
+          setReels(Array.isArray(d) ? d : []);
+          setReelsLoading(false);
+        }
+      })
+      .catch(() => { if (!cancelled) setReelsLoading(false); });
+
+    fetch("/api/resources")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => {
+        if (!cancelled) {
+          setResources(Array.isArray(d) ? d : []);
+          setResourcesLoading(false);
+        }
+      })
+      .catch(() => { if (!cancelled) setResourcesLoading(false); });
 
     fetch("/api/homepage-content")
       .then((r) => (r.ok ? r.json() : null))
@@ -314,6 +360,142 @@ export default function Home() {
                 <p className="text-sm text-fg-muted leading-relaxed">Detailed analytics for students, instructors, and administrators.</p>
               </Link>
             </div>
+          </div>
+        </section>
+
+                {/* Video Lessons */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+              <div>
+                <h2 className="text-3xl font-extrabold text-fg sm:text-4xl">Video lessons</h2>
+                <p className="mt-4 text-lg text-fg-muted">
+                  Short-form educational reels and featured learning content.
+                </p>
+              </div>
+              <Link href="/reels" className="mt-4 sm:mt-0 inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-700">
+                Browse all videos <span className="ml-1">→</span>
+              </Link>
+            </div>
+            {reelsLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="bg-surface rounded-xl border border-border overflow-hidden animate-pulse">
+                    <div className="w-full aspect-video bg-surface-2" />
+                    <div className="p-4 space-y-2">
+                      <div className="h-3 bg-surface-2 rounded w-3/4" />
+                      <div className="h-3 bg-surface-2 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : reels.length === 0 ? (
+              <div className="text-center py-12 bg-surface rounded-xl border border-border">
+                <VideoIcon size={48} />
+                <p className="mt-4 text-lg text-fg-muted">No videos published yet.</p>
+                <Link href="/reels" className="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-md bg-brand-600 text-white font-medium hover:bg-brand-700">
+                  Visit the video library
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {reels.slice(0, 6).map((reel, idx) => (
+                  <Link key={reel._id} href="/reels" className="group bg-surface rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="relative aspect-video bg-surface-2 overflow-hidden">
+                      <img
+                        src={reel.thumbnailUrl || reel.thumbnail || FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length]}
+                        alt={reel.title || reel.caption || "Video lesson"}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-brand-600 text-2xl font-bold">▶</div>
+                      </div>
+                      {reel.duration ? (
+                        <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-xs font-medium">
+                          {Math.floor(reel.duration / 60)}:{String(Math.floor(reel.duration % 60)).padStart(2, "0")}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-fg line-clamp-2">
+                        {reel.title || reel.caption || "Untitled video"}
+                      </h3>
+                      {reel.category && (
+                        <p className="mt-1 text-xs text-brand-600 uppercase tracking-wide font-medium">{reel.category}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Learning Resources */}
+        <section className="py-16 bg-bg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+              <div>
+                <h2 className="text-3xl font-extrabold text-fg sm:text-4xl">Learning resources</h2>
+                <p className="mt-4 text-lg text-fg-muted">
+                  PDFs, notes, study guides, and downloadable course materials.
+                </p>
+              </div>
+              <Link href="/resources" className="mt-4 sm:mt-0 inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-700">
+                Browse library <span className="ml-1">→</span>
+              </Link>
+            </div>
+            {resourcesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="bg-surface rounded-lg border border-border p-5 animate-pulse">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-surface-2 rounded-lg flex-shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 bg-surface-2 rounded w-3/4" />
+                        <div className="h-3 bg-surface-2 rounded w-1/2" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : resources.length === 0 ? (
+              <div className="text-center py-12 bg-surface rounded-xl border border-border">
+                <FileIcon size={48} />
+                <p className="mt-4 text-lg text-fg-muted">No learning resources uploaded yet.</p>
+                <Link href="/resources" className="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-md bg-brand-600 text-white font-medium hover:bg-brand-700">
+                  Open resource library
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {resources.slice(0, 6).map((res) => {
+                  const type = (res.fileType || res.mimeType || "").toLowerCase();
+                  const ext = type.split("/").pop() || type;
+                  const label = (ext || "file").toUpperCase();
+                  return (
+                    <Link key={res._id} href="/resources" className="group bg-surface rounded-lg border border-border p-5 hover:shadow-md transition-shadow">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 flex-shrink-0">
+                          <FileIcon size={20} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-fg text-sm line-clamp-2 group-hover:text-brand-600 transition-colors">
+                            {res.title || res.fileName || "Untitled resource"}
+                          </h3>
+                          <div className="mt-1 flex items-center gap-2 text-xs text-fg-muted">
+                            <span className="px-1.5 py-0.5 rounded bg-surface-2 font-medium">{label}</span>
+                            {res.size ? (
+                              <span>{res.size > 1024 * 1024 ? (res.size / 1024 / 1024).toFixed(1) + " MB" : Math.round(res.size / 1024) + " KB"}</span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
