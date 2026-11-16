@@ -234,6 +234,18 @@ async def course_curriculum(course_id: str):
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
+    # Look up the course creator (instructor) — Course has createdBy
+    instructor = None
+    if course.get("createdBy"):
+        creator = await db.users.find_one({"_id": course["createdBy"]})
+        if creator:
+            instructor = {
+                "id": str(creator["_id"]),
+                "fullName": creator.get("fullName", ""),
+                "title": creator.get("title", ""),
+                "avatarUrl": creator.get("avatarUrl", ""),
+            }
+
     modules = []
     async for m in db.modules.find({"courseId": cid}).sort("orderIndex", 1):
         mid = str(m["_id"])
@@ -245,6 +257,7 @@ async def course_curriculum(course_id: str):
                 "orderIndex": s.get("orderIndex", 0),
                 "hasQuiz": bool(s.get("quiz")),
                 "materialsCount": len(s.get("materialUrls", [])),
+                "materialUrls": s.get("materialUrls", []),
             })
         modules.append({
             "id": mid,
@@ -274,7 +287,8 @@ async def course_curriculum(course_id: str):
             "title": course.get("title", ""),
             "description": course.get("description", ""),
             "price": float(course.get("price", 0)),
-        },
+                "instructor": instructor,
+    },
         "modules": modules,
         "standaloneSessions": standalone,
     }

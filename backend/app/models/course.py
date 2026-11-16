@@ -9,6 +9,8 @@ class CourseCreate(BaseModel):
     title: str = Field(..., min_length=2)
     description: str = Field(..., min_length=5)
     price: float = Field(..., ge=0)
+    learningOutcomes: list[str] | None = None
+    category: str | None = None
 
 
 class CourseInDB(BaseModel):
