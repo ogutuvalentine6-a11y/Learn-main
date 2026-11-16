@@ -51,6 +51,22 @@ interface Founder {
   avatarUrl?: string;
 }
 
+interface Instructor {
+  _id: string;
+  fullName?: string;
+  name?: string;
+  title?: string;
+  avatarUrl?: string;
+}
+
+interface CalendarEvent {
+  _id: string;
+  title?: string;
+  description?: string;
+  startAt?: string;
+  endAt?: string;
+}
+
 interface HomepageCMS {
   hero?: { title?: string; subtitle?: string; badgeText?: string };
   founder?: Founder;
@@ -89,6 +105,10 @@ export default function Home() {
   const [resourcesLoading, setResourcesLoading] = useState(true);
 
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [instructorsLoading, setInstructorsLoading] = useState(true);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,6 +149,34 @@ export default function Home() {
       })
       .catch(() => { if (!cancelled) setResourcesLoading(false); });
 
+    fetch("/api/instructors")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => {
+        if (!cancelled) {
+          setInstructors(Array.isArray(d) ? d : []);
+          setInstructorsLoading(false);
+        }
+      })
+      .catch(() => { if (!cancelled) setInstructorsLoading(false); });
+
+    (async () => {
+      let list: CalendarEvent[] = [];
+      for (const url of ["/api/events", "/api/academic/events"]) {
+        try {
+          const r = await fetch(url);
+          if (r.ok) {
+            const d = await r.json();
+            list = Array.isArray(d) ? d : (d?.items || []);
+            break;
+          }
+        } catch {}
+      }
+      if (!cancelled) {
+        setEvents(list);
+        setEventsLoading(false);
+      }
+    })();
+
     fetch("/api/homepage-content")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (!cancelled) setCms(d); })
@@ -154,6 +202,10 @@ export default function Home() {
   const heroSubtitle = cms?.hero?.subtitle ??
     "Structured courses, live classrooms, expert instructors, and measurable progress — one connected learning platform.";
   const founder = cms?.founder;
+  const announcements = (cms?.announcements ?? []).filter((a) => a.active !== false);
+  const uniqueCategories = Array.from(
+    new Set(courses.map((c) => c.category).filter((c): c is string => !!c))
+  ).slice(0, 6);
   const totalStats = (stats?.students ?? 0) + (stats?.courses ?? 0) + (stats?.instructors ?? 0);
   const showStats = totalStats > 0;
 
@@ -282,7 +334,30 @@ export default function Home() {
           </section>
         )}
 
-        {/* Featured Courses — real data */}
+                {/* Popular Categories */}
+        {uniqueCategories.length > 0 && (
+          <section className="py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center max-w-3xl mx-auto">
+                <h2 className="text-3xl font-extrabold text-fg sm:text-4xl">Explore by category</h2>
+                <p className="mt-4 text-lg text-fg-muted">Real course categories from the platform.</p>
+              </div>
+              <div className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {uniqueCategories.map((cat) => (
+                  <Link
+                    key={cat}
+                    href={`/courses?category=${encodeURIComponent(cat)}`}
+                    className="group bg-surface rounded-xl border border-border p-5 text-center hover:border-brand-600 hover:shadow-md hover:-translate-y-1 transition-all duration-200"
+                  >
+                    <p className="text-sm font-medium text-fg group-hover:text-brand-600 transition-colors">{cat}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+{/* Featured Courses — real data */}
         <section className="py-16 bg-bg sm:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
@@ -515,7 +590,133 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Founder section — from CMS, honest about empty bio */}
+                {/* Featured Instructors */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+              <div>
+                <h2 className="text-3xl font-extrabold text-fg sm:text-4xl">Featured instructors</h2>
+                <p className="mt-4 text-lg text-fg-muted">Industry professionals dedicated to your success.</p>
+              </div>
+              <Link href="/instructors" className="mt-4 sm:mt-0 inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-700">
+                All instructors <span className="ml-1">→</span>
+              </Link>
+            </div>
+            {instructorsLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="bg-surface rounded-xl border border-border p-6 animate-pulse">
+                    <div className="w-20 h-20 rounded-full bg-surface-2 mx-auto" />
+                    <div className="mt-4 h-4 bg-surface-2 rounded w-2/3 mx-auto" />
+                  </div>
+                ))}
+              </div>
+            ) : instructors.length === 0 ? (
+              <div className="text-center py-12 bg-surface rounded-xl border border-border">
+                <UsersIcon size={48} />
+                <p className="mt-4 text-lg text-fg-muted">Instructor profiles coming soon.</p>
+                <Link href="/instructors" className="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-md bg-brand-600 text-white font-medium hover:bg-brand-700">
+                  Browse instructors
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {instructors.slice(0, 4).map((inst) => {
+                  const nm = inst.fullName || inst.name || "Instructor";
+                  return (
+                    <Link key={inst._id} href={`/instructors/${inst._id}`} className="group bg-surface rounded-xl border border-border p-6 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+                      {inst.avatarUrl ? (
+                        <img src={inst.avatarUrl} alt={nm} className="w-20 h-20 rounded-full object-cover mx-auto" />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-brand-600 text-white flex items-center justify-center text-xl font-bold mx-auto">
+                          {nm.split(" ").map((s) => s[0]).slice(0, 2).join("")}
+                        </div>
+                      )}
+                      <h3 className="mt-4 font-semibold text-fg group-hover:text-brand-600 transition-colors">{nm}</h3>
+                      {inst.title && <p className="mt-1 text-sm text-fg-muted line-clamp-1">{inst.title}</p>}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Latest Announcements */}
+        {announcements.length > 0 && (
+          <section className="py-16 bg-bg">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-3xl font-extrabold text-fg text-center sm:text-4xl">Latest updates</h2>
+              <div className="mt-8 space-y-3">
+                {announcements.slice(0, 5).map((a, i) => (
+                  <div key={i} className="bg-surface rounded-lg border border-border p-5 flex items-start gap-4">
+                    <span className="text-2xl flex-shrink-0">📢</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-fg">{a.text}</p>
+                      {a.link && (
+                        <Link href={a.link} className="text-sm text-brand-600 hover:text-brand-700 mt-1 inline-block">
+                          Learn more →
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Upcoming Events */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+              <div>
+                <h2 className="text-3xl font-extrabold text-fg sm:text-4xl">Upcoming events</h2>
+                <p className="mt-4 text-lg text-fg-muted">Live sessions, workshops, and academic activities.</p>
+              </div>
+              <Link href="/events" className="mt-4 sm:mt-0 inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-700">
+                All events <span className="ml-1">→</span>
+              </Link>
+            </div>
+            {eventsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="bg-surface rounded-xl border border-border p-5 animate-pulse">
+                    <div className="h-4 bg-surface-2 rounded w-1/3" />
+                    <div className="mt-3 h-3 bg-surface-2 rounded w-2/3" />
+                  </div>
+                ))}
+              </div>
+            ) : events.length === 0 ? (
+              <div className="text-center py-12 bg-surface rounded-xl border border-border">
+                <p className="text-lg text-fg-muted">No events scheduled right now.</p>
+                <Link href="/events" className="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-md bg-brand-600 text-white font-medium hover:bg-brand-700">
+                  View calendar
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {events.slice(0, 6).map((ev) => (
+                  <Link key={ev._id} href="/events" className="group bg-surface rounded-xl border border-border p-5 hover:border-brand-600 hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+                    {ev.startAt && (
+                      <p className="text-xs font-medium text-brand-600 uppercase tracking-wide">
+                        {new Date(ev.startAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    )}
+                    <h3 className="mt-2 font-semibold text-fg group-hover:text-brand-600 transition-colors line-clamp-2">
+                      {ev.title || "Untitled event"}
+                    </h3>
+                    {ev.description && (
+                      <p className="mt-2 text-sm text-fg-muted line-clamp-2">{ev.description}</p>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+{/* Founder section — from CMS, honest about empty bio */}
         {founder && founder.name && (
           <section className="py-16 bg-brand-50 lg:py-24">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -570,7 +771,71 @@ export default function Home() {
           </section>
         )}
 
-        {/* CTA */}
+                {/* Why Learn */}
+        <section className="py-16 bg-bg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h2 className="text-3xl font-extrabold text-fg sm:text-4xl">Why learn with us?</h2>
+              <p className="mt-4 text-lg text-fg-muted">Built for real progress, not just pretty pages.</p>
+            </div>
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-14 h-14 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mx-auto">🎯</div>
+                <h3 className="mt-4 font-bold text-fg">Outcome focused</h3>
+                <p className="mt-2 text-sm text-fg-muted leading-relaxed">Structured curriculum with measurable progress and verifiable certificates.</p>
+              </div>
+              <div className="text-center">
+                <div className="w-14 h-14 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mx-auto">👥</div>
+                <h3 className="mt-4 font-bold text-fg">Live instruction</h3>
+                <p className="mt-2 text-sm text-fg-muted leading-relaxed">Real instructors, real classrooms — live sessions and interactive discussions.</p>
+              </div>
+              <div className="text-center">
+                <div className="w-14 h-14 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mx-auto">🔒</div>
+                <h3 className="mt-4 font-bold text-fg">Secure and private</h3>
+                <p className="mt-2 text-sm text-fg-muted leading-relaxed">JWT-verified auth, role-based access, and audited actions across the platform.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-16 bg-white">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-extrabold text-fg text-center sm:text-4xl">Frequently asked questions</h2>
+            <div className="mt-10 space-y-3">
+              {[
+                { q: "How do I enrol in a course?", a: "Create a free account, browse the catalogue, and click Enrol on any course. Paid courses use secure Paystack checkout." },
+                { q: "Do you offer certificates?", a: "Yes — complete a course and pass its assessments to earn a verifiable certificate from your dashboard." },
+                { q: "Can I access content on mobile?", a: "The entire platform is mobile-first: courses, videos, resources, and your dashboard all work on phones and tablets." },
+                { q: "How are live sessions scheduled?", a: "Instructors publish live sessions in the academic calendar. You'll be notified through the platform and can join from your dashboard." },
+                { q: "What payment methods do you accept?", a: "Card payments via Paystack. All transactions are PCI-compliant and processed on secure infrastructure." },
+                { q: "How do I get support?", a: "Visit the Help Centre or Contact page. Students can also raise welfare tickets from their dashboard." },
+              ].map((faq, i) => (
+                <details key={i} className="group bg-surface rounded-lg border border-border p-5">
+                  <summary className="font-semibold text-fg cursor-pointer list-none flex justify-between items-center gap-4">
+                    <span>{faq.q}</span>
+                    <span className="text-brand-600 group-open:rotate-180 transition-transform flex-shrink-0">▾</span>
+                  </summary>
+                  <p className="mt-3 text-sm text-fg-muted leading-relaxed">{faq.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Contact */}
+        <section className="py-16 bg-bg">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-fg">Have questions?</h2>
+            <p className="mt-3 text-lg text-fg-muted">Our team is here to help with admissions, courses, and technical support.</p>
+            <div className="mt-6 flex flex-wrap gap-3 justify-center">
+              <Link href="/contact" className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-brand-600 text-white font-medium hover:bg-brand-700">Contact us</Link>
+              <Link href="/about" className="inline-flex items-center justify-center px-6 py-3 rounded-md border border-border text-fg font-medium hover:bg-surface-2">About Learn</Link>
+            </div>
+          </div>
+        </section>
+
+{/* CTA */}
         <section className="bg-brand-800 py-16">
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
