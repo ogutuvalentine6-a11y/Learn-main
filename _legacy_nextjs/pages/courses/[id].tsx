@@ -11,6 +11,7 @@ interface CurriculumSession {
   orderIndex: number;
   hasQuiz: boolean;
   materialsCount: number;
+  materialUrls?: string[];
 }
 
 interface CurriculumModule {
@@ -21,6 +22,13 @@ interface CurriculumModule {
   sessions: CurriculumSession[];
 }
 
+interface InstructorInfo {
+  id: string;
+  fullName: string;
+  title?: string;
+  avatarUrl?: string;
+}
+
 interface CurriculumResponse {
   course: {
     _id?: string;
@@ -28,9 +36,12 @@ interface CurriculumResponse {
     title: string;
     description: string;
     price: number;
+    category?: string;
+    learningOutcomes?: string[];
   };
   modules: CurriculumModule[];
   standaloneSessions: CurriculumSession[];
+  instructor?: InstructorInfo | null;
 }
 
 interface RelatedCourse {
@@ -50,6 +61,7 @@ export default function CourseDetail() {
   const { id } = router.query;
   const [data, setData] = useState<CurriculumResponse | null>(null);
   const [related, setRelated] = useState<RelatedCourse[]>([]);
+  const [relatedVideos, setRelatedVideos] = useState<{ _id: string; title?: string; caption?: string; videoUrl?: string; thumbnailUrl?: string; category?: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,7 +69,22 @@ export default function CourseDetail() {
 
     fetch(`/api/modules/course/${id}/curriculum`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r)))
-      .then(setData)
+      .then((d: CurriculumResponse) => {
+        setData(d);
+        // Fetch related videos when the course has a category
+        if (d.course?.category) {
+          fetch(`/api/reels`)
+            .then((r) => (r.ok ? r.json() : []))
+            .then((list) => {
+              const arr = Array.isArray(list) ? list : [];
+              const matched = arr
+                .filter((v: any) => v?.category === d.course.category)
+                .slice(0, 3);
+              setRelatedVideos(matched);
+            })
+            .catch(() => {});
+        }
+      })
       .catch(() => setError("Course not found or not published"));
 
     fetch(`/api/course-list`)
@@ -147,6 +174,11 @@ export default function CourseDetail() {
               {course.description}
             </p>
             <div className="mt-6 flex flex-wrap gap-2 text-sm">
+              {course.category && (
+                <span className="px-3 py-1 rounded-full bg-brand-600 text-white font-medium">
+                  {course.category}
+                </span>
+              )}
               <span className="px-3 py-1 rounded-full bg-brand-50 text-brand-700 font-medium">
                 {modules.length} module{modules.length === 1 ? "" : "s"}
               </span>
@@ -171,6 +203,21 @@ export default function CourseDetail() {
         <section className="py-10 md:py-14">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+              {/* Learning outcomes */}
+              {course.learningOutcomes && course.learningOutcomes.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-fg mb-4">What you'll learn</h2>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {course.learningOutcomes.map((lo, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-fg-muted">
+                        <span className="flex-shrink-0 text-brand-600 font-bold mt-0.5">✓</span>
+                        <span>{lo}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {/* Curriculum */}
               <div>
                 <h2 className="text-xl font-bold text-fg mb-4">Course curriculum</h2>
@@ -296,6 +343,56 @@ export default function CourseDetail() {
                   </div>
                 )}
 
+                {/* Related videos */}
+                {relatedVideos.length > 0 && (
+                  <div className="mt-12">
+                    <h2 className="text-xl font-bold text-fg mb-4">
+                      Related videos in {course.category}
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {relatedVideos.map((v) => {
+                        const yt = (v.videoUrl || "").match(
+                          /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+                        );
+                        const thumb =
+                          v.thumbnailUrl ||
+                          (yt ? `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg` : null);
+                        return (
+                          <a
+                            key={v._id}
+                            href={v.videoUrl || "/reels"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group bg-surface rounded-lg border border-border overflow-hidden hover:border-brand-600 hover:shadow-md transition-all"
+                          >
+                            <div className="relative aspect-video bg-surface-2">
+                              {thumb ? (
+                                <img
+                                  src={thumb}
+                                  alt={v.title || ""}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              ) : null}
+                            </div>
+                            <div className="p-3">
+                              <p className="text-sm font-semibold text-fg line-clamp-2 group-hover:text-brand-600 transition-colors">
+                                {v.title || v.caption || "Untitled"}
+                              </p>
+                            </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                    <Link
+                      href="/reels"
+                      className="mt-4 inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-700"
+                    >
+                      All videos <span className="ml-1">→</span>
+                    </Link>
+                  </div>
+                )}
+
                 {/* Related courses */}
                 {related.length > 0 && (
                   <div className="mt-12">
@@ -365,6 +462,41 @@ export default function CourseDetail() {
                   >
                     Back to all courses
                   </Link>
+
+                  {data.instructor && data.instructor.fullName && (
+                    <div className="mt-6 pt-6 border-t border-border">
+                      <p className="text-xs uppercase font-semibold text-fg-muted tracking-wide mb-3">
+                        Your instructor
+                      </p>
+                      <div className="flex items-center gap-3">
+                        {data.instructor.avatarUrl ? (
+                          <img
+                            src={data.instructor.avatarUrl}
+                            alt={data.instructor.fullName}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold">
+                            {data.instructor.fullName
+                              .split(" ")
+                              .map((s) => s[0])
+                              .slice(0, 2)
+                              .join("")}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-fg truncate">
+                            {data.instructor.fullName}
+                          </p>
+                          {data.instructor.title && (
+                            <p className="text-xs text-fg-muted truncate">
+                              {data.instructor.title}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-6 pt-6 border-t border-border space-y-3 text-sm text-fg-muted">
                     <div className="flex items-center gap-2">
