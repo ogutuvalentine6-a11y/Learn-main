@@ -9,7 +9,17 @@ _client: AsyncIOMotorClient | None = None
 def get_client() -> AsyncIOMotorClient:
     global _client
     if _client is None:
-        _client = AsyncIOMotorClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
+        uri = settings.MONGODB_URI or ""
+        is_local = any(h in uri for h in ("localhost", "127.0.0.1", "0.0.0.0"))
+
+        kwargs = {}
+        # Only apply the certifi CA bundle for remote (Atlas) TLS connections.
+        # Local MongoDB speaks plaintext by default — forcing TLS causes
+        # SSL: UNEXPECTED_EOF_WHILE_READING on handshake.
+        if not is_local:
+            kwargs["tlsCAFile"] = certifi.where()
+
+        _client = AsyncIOMotorClient(uri, **kwargs)
     return _client
 
 

@@ -1,513 +1,167 @@
 import Link from "next/link";
 import { useState } from "react";
-
-const navigation = [
-  {
-    title: "Learn",
-    links: [
-      { label: "Explore Courses", href: "/courses", description: "Browse available courses" },
-      { label: "Instructors", href: "/instructors", description: "Meet the teaching team" },
-      { label: "Live Learning", href: "/live", description: "Live classes and sessions" },
-      { label: "Study Groups", href: "/study-groups", description: "Learn with other students" },
-    ],
-  },
-  {
-    title: "Academic",
-    links: [
-      { label: "Admissions", href: "/admissions", description: "Start your enrolment journey" },
-      { label: "Academic Calendar", href: "/academic-calendar", description: "Important academic dates" },
-      { label: "Events", href: "/events", description: "Upcoming learning events" },
-      { label: "Assignments", href: "/assignments", description: "Learning tasks and submissions" },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { label: "Discussions", href: "/discussions", description: "Share ideas and ask questions" },
-      { label: "Resources", href: "/resources", description: "Learning materials and resources" },
-      { label: "Careers", href: "/careers", description: "Explore career opportunities" },
-      { label: "About Us", href: "/about", description: "Discover our platform" },
-    ],
-  },
-];
-
-const highlights = [
-  {
-    number: "01",
-    title: "Structured learning",
-    description: "Follow organised courses, lessons and learning materials designed to make your academic journey clearer.",
-    image: "/images/education/classroom-learning.jpg",
-    alt: "Students participating in a classroom learning session",
-  },
-  {
-    number: "02",
-    title: "Learn collaboratively",
-    description: "Connect with other learners, participate in discussions and build knowledge through shared experiences.",
-    image: "/images/education/collaborative-learning.jpg",
-    alt: "Students collaborating on learning activities",
-  },
-  {
-    number: "03",
-    title: "Guidance from instructors",
-    description: "Access academic guidance, instructor support, assignments and feedback throughout your studies.",
-    image: "/images/education/teacher-guiding-students.jpg",
-    alt: "An instructor guiding students",
-  },
-];
-
-const capabilities = [
-  {
-    icon: "▤",
-    title: "Courses and programmes",
-    description: "Explore organised learning content, course materials and academic programmes.",
-    href: "/courses",
-  },
-  {
-    icon: "✓",
-    title: "Assignments and assessments",
-    description: "Access assignments, quizzes and assessment activities in one learning environment.",
-    href: "/assignments",
-  },
-  {
-    icon: "◷",
-    title: "Academic schedules",
-    description: "Keep track of academic dates, events, timetables and learning sessions.",
-    href: "/academic-calendar",
-  },
-  {
-    icon: "◎",
-    title: "Learning community",
-    description: "Participate in discussions, study groups and collaborative learning activities.",
-    href: "/discussions",
-  },
-  {
-    icon: "▣",
-    title: "Learning resources",
-    description: "Find useful study materials and resources to support your learning.",
-    href: "/resources",
-  },
-  {
-    icon: "▥",
-    title: "Progress and achievement",
-    description: "Use your student workspace to access learning progress and achievements.",
-    href: "/login",
-  },
-];
+import { MenuIcon, XIcon, BookIcon, ShieldIcon, ChartIcon } from "@/components/layout/icons";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* Announcement */}
-      <div className="bg-slate-950 px-4 py-2.5 text-center text-sm text-white">
-        <span className="font-semibold text-blue-300">Learn Education</span>
-        <span className="mx-2 text-slate-500">|</span>
-        A connected environment for teaching, learning and academic growth.
-        <Link href="/courses" className="ml-2 font-semibold text-blue-300 hover:text-white">
-          Explore courses →
-        </Link>
+    <div className="min-h-screen bg-bg text-fg font-sans">
+      <div className="bg-brand-800 text-white text-center py-2 px-4 text-sm font-medium">
+        🎓 New Autumn cohort now open for enrolment. <Link href="/courses" className="underline hover:text-brand-200">Explore courses →</Link>
       </div>
 
-      {/* Main navigation */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="Learn home">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700 text-xl font-black text-white">
-              L
-            </span>
-            <span>
-              <span className="block text-xl font-extrabold tracking-tight text-slate-950">
-                Learn<span className="text-blue-700">.</span>
-              </span>
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Education platform
-              </span>
-            </span>
-          </Link>
-
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-            <Link href="/" className="rounded-lg px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50">
-              Home
-            </Link>
-
-            {navigation.map((group) => (
-              <div key={group.title} className="group relative">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-blue-700"
-                  aria-haspopup="true"
-                >
-                  {group.title}
-                  <span className="text-xs">⌄</span>
-                </button>
-
-                <div className="invisible absolute left-0 top-full z-50 w-80 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                  {group.links.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="block rounded-xl px-4 py-3 hover:bg-blue-50"
-                    >
-                      <span className="block text-sm font-bold text-slate-800">{item.label}</span>
-                      <span className="mt-1 block text-xs text-slate-500">{item.description}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            <Link href="/contact" className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-blue-700">
-              Contact
-            </Link>
-          </nav>
-
-          <div className="hidden items-center gap-3 lg:flex">
-            <Link href="/login" className="rounded-lg px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-100">
-              Sign in
-            </Link>
-            <Link href="/register" className="rounded-lg bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800">
-              Create account <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 text-2xl text-slate-800 hover:bg-slate-100 lg:hidden"
-            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? "×" : "☰"}
-          </button>
-        </div>
-
-        {/* Mobile navigation */}
-        {mobileMenuOpen && (
-          <nav className="max-h-[75vh] overflow-y-auto border-t border-slate-200 bg-white px-4 py-5 lg:hidden" aria-label="Mobile navigation">
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block rounded-lg px-3 py-3 font-bold text-blue-700 hover:bg-blue-50"
-            >
-              Home
-            </Link>
-
-            {navigation.map((group) => (
-              <details key={group.title} className="border-b border-slate-100 py-2">
-                <summary className="cursor-pointer list-none rounded-lg px-3 py-3 font-bold text-slate-800 hover:bg-slate-50">
-                  {group.title}
-                  <span className="float-right text-slate-400">＋</span>
-                </summary>
-                <div className="pb-2 pl-3">
-                  {group.links.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block rounded-lg px-3 py-3 text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </details>
-            ))}
-
-            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg px-3 py-3 font-semibold text-slate-700 hover:bg-slate-50">
-              Contact
-            </Link>
-
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-bold text-slate-800">
-                Sign in
-              </Link>
-              <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="rounded-lg bg-blue-700 px-4 py-3 text-center text-sm font-bold text-white">
-                Register
-              </Link>
+      <header className="sticky top-0 z-50 bg-surface border-b border-border shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex-shrink-0 flex items-center">
+              <Link href="/" className="text-2xl font-bold text-brand-800 tracking-tight">Learn<span className="text-brand-600">.</span></Link>
             </div>
-          </nav>
+            <nav className="hidden md:flex space-x-8 items-center">
+              <Link href="/programmes" className="text-sm font-medium text-fg hover:text-brand-600 transition-colors">Programmes</Link>
+              <Link href="/courses" className="text-sm font-medium text-fg hover:text-brand-600 transition-colors">Courses</Link>
+              <Link href="/instructors" className="text-sm font-medium text-fg hover:text-brand-600 transition-colors">Instructors</Link>
+              <Link href="/about" className="text-sm font-medium text-fg hover:text-brand-600 transition-colors">About</Link>
+              <Link href="/contact" className="text-sm font-medium text-fg hover:text-brand-600 transition-colors">Contact</Link>
+            </nav>
+            <div className="hidden md:flex items-center space-x-4">
+              <Link href="/login" className="text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors">Sign In</Link>
+              <Link href="/register" className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors shadow-sm">Get Started</Link>
+            </div>
+            <div className="flex md:hidden">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-md text-fg-muted hover:text-fg hover:bg-surface-2">
+                {mobileMenuOpen ? <XIcon size={24} /> : <MenuIcon size={24} />}
+              </button>
+            </div>
+          </div>
+        </div>
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-surface border-t border-border">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <Link href="/programmes" className="block px-3 py-2 rounded-md text-base font-medium text-fg hover:bg-surface-2">Programmes</Link>
+              <Link href="/courses" className="block px-3 py-2 rounded-md text-base font-medium text-fg hover:bg-surface-2">Courses</Link>
+              <Link href="/instructors" className="block px-3 py-2 rounded-md text-base font-medium text-fg hover:bg-surface-2">Instructors</Link>
+              <Link href="/about" className="block px-3 py-2 rounded-md text-base font-medium text-fg hover:bg-surface-2">About</Link>
+              <Link href="/login" className="block px-3 py-2 rounded-md text-base font-medium text-brand-600 hover:bg-surface-2 mt-4 border-t border-border pt-4">Sign In</Link>
+              <Link href="/register" className="block px-3 py-2 rounded-md text-base font-medium text-white bg-brand-600 hover:bg-brand-700 mt-2 text-center">Get Started</Link>
+            </div>
+          </div>
         )}
       </header>
 
       <main>
-        {/* Hero */}
-        <section className="relative isolate overflow-hidden bg-slate-950">
-          <div className="absolute inset-0 -z-10">
-            <img
-              src="/images/education/classroom-learning.jpg"
-              alt=""
-              className="h-full w-full object-cover opacity-35"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/35" />
-          </div>
-
-          <div className="mx-auto grid min-h-[590px] max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-28">
-            <div className="max-w-2xl">
-              <span className="inline-flex items-center rounded-full border border-blue-300/30 bg-blue-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-blue-200">
-                A connected learning experience
-              </span>
-
-              <h1 className="mt-7 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Learn with purpose.
-                <span className="mt-2 block text-blue-300">Grow with confidence.</span>
-              </h1>
-
-              <p className="mt-7 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
-                Discover courses, connect with instructors, participate in assessments
-                and access the academic tools you need — all through one organised
-                learning platform.
-              </p>
-
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Link href="/courses" className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-7 py-4 font-bold text-white shadow-lg transition hover:bg-blue-500">
-                  Explore courses <span className="ml-3">→</span>
-                </Link>
-                <Link href="/register" className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-7 py-4 font-bold text-white transition hover:bg-white/20">
-                  Create your account
-                </Link>
-              </div>
-
-              <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-slate-300">
-                <span>✓ Organised courses</span>
-                <span>✓ Academic support</span>
-                <span>✓ Flexible access</span>
-              </div>
-            </div>
-
-            <div className="relative hidden lg:block">
-              <div className="absolute -inset-5 rounded-[2rem] border border-blue-300/20" />
-              <img
-                src="/images/education/classroom-lecture.jpg"
-                alt="A classroom lecture in progress"
-                className="relative h-[420px] w-full rounded-[1.5rem] object-cover shadow-2xl"
-              />
-              <div className="absolute -bottom-7 -left-8 max-w-xs rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
-                <p className="text-xs font-bold uppercase tracking-widest text-blue-700">Your learning space</p>
-                <p className="mt-2 text-lg font-extrabold text-slate-900">One platform. Many possibilities.</p>
-                <p className="mt-1 text-sm text-slate-500">Learn, participate and make progress.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Platform introduction */}
-        <section className="border-b border-slate-200 bg-white py-16 sm:py-20">
-          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-            <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Designed for learning</p>
-            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Everything you need for a more connected academic journey
-            </h2>
-            <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-600">
-              Learn brings academic content, learning activities, communication and
-              student services into a single digital environment for students,
-              instructors and administrators.
-            </p>
-          </div>
-        </section>
-
-        {/* Learning highlights */}
-        <section className="bg-slate-50 py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-              <div>
-                <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">The learning experience</p>
-                <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                  Learning that moves you forward
-                </h2>
-              </div>
-              <Link href="/courses" className="font-bold text-blue-700 hover:text-blue-900">
-                Discover learning opportunities →
-              </Link>
-            </div>
-
-            <div className="mt-10 grid gap-7 md:grid-cols-3">
-              {highlights.map((item) => (
-                <article key={item.number} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-                  <div className="relative h-56 overflow-hidden">
-                    <img src={item.image} alt={item.alt} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
-                    <span className="absolute left-4 top-4 rounded-lg bg-white px-3 py-2 text-xs font-black text-blue-700 shadow">
-                      {item.number}
-                    </span>
+        <section className="relative bg-white overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+              <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                <div className="sm:text-center lg:text-left">
+                  <h1 className="text-4xl tracking-tight font-extrabold text-fg sm:text-5xl md:text-6xl">
+                    <span className="block xl:inline">Empowering Learning.</span>{" "}
+                    <span className="block text-brand-600 xl:inline">Building Knowledge.</span>
+                  </h1>
+                  <p className="mt-3 text-base text-fg-muted sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                    Discover structured courses, interactive learning experiences, assessments, professional instruction, and measurable academic progress — all within one connected learning platform.
+                  </p>
+                  <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                    <div className="rounded-md shadow">
+                      <Link href="/courses" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 md:py-4 md:text-lg transition-colors">Explore Courses</Link>
+                    </div>
+                    <div className="mt-3 sm:mt-0 sm:ml-3">
+                      <Link href="/register" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-brand-700 bg-brand-50 hover:bg-brand-100 md:py-4 md:text-lg transition-colors">Create Account</Link>
+                    </div>
                   </div>
-                  <div className="p-7">
-                    <h3 className="text-xl font-extrabold text-slate-950">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
-                  </div>
-                </article>
-              ))}
+                </div>
+              </main>
+            </div>
+          </div>
+          <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+            <img className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="/images/education/hero-classroom.jpg" alt="Students learning in a classroom" />
+          </div>
+        </section>
+
+        <section className="bg-brand-800 py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-8 md:grid-cols-4 text-center">
+              <div><p className="text-4xl font-extrabold text-white">10,000+</p><p className="mt-2 text-sm font-medium text-brand-200 uppercase tracking-wide">Active Students</p></div>
+              <div><p className="text-4xl font-extrabold text-white">150+</p><p className="mt-2 text-sm font-medium text-brand-200 uppercase tracking-wide">Expert Instructors</p></div>
+              <div><p className="text-4xl font-extrabold text-white">500+</p><p className="mt-2 text-sm font-medium text-brand-200 uppercase tracking-wide">Structured Courses</p></div>
+              <div><p className="text-4xl font-extrabold text-white">98%</p><p className="mt-2 text-sm font-medium text-brand-200 uppercase tracking-wide">Completion Rate</p></div>
             </div>
           </div>
         </section>
 
-        {/* Platform capabilities */}
-        <section className="bg-white py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Platform capabilities</p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                Your academic tools, connected
-              </h2>
-              <p className="mt-4 leading-8 text-slate-600">
-                Access the key areas of the platform from one clear starting point.
-              </p>
+        <section className="py-16 bg-bg sm:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h2 className="text-3xl font-extrabold text-fg sm:text-4xl">A complete learning ecosystem</h2>
+              <p className="mt-4 text-lg text-fg-muted">Everything you need to teach, learn, and manage academic success in one unified platform.</p>
             </div>
-
-            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {capabilities.map((item) => (
-                <Link key={item.title} href={item.href} className="group rounded-2xl border border-slate-200 bg-white p-7 transition hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-lg">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-2xl font-bold text-blue-700 transition group-hover:bg-blue-700 group-hover:text-white">
-                    {item.icon}
-                  </span>
-                  <h3 className="mt-5 text-lg font-extrabold text-slate-950">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
-                  <span className="mt-5 inline-flex font-bold text-blue-700">
-                    Explore <span className="ml-2 transition group-hover:translate-x-1">→</span>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Instructor section */}
-        <section className="overflow-hidden bg-slate-950 py-20">
-          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <div className="overflow-hidden rounded-2xl">
-              <img
-                src="/images/education/teacher-guiding-students.jpg"
-                alt="An instructor supporting students during learning"
-                className="h-[380px] w-full object-cover"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-300">Teaching and support</p>
-              <h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl">
-                Better learning happens with the right guidance.
-              </h2>
-              <p className="mt-5 leading-8 text-slate-300">
-                Learning is more than reading materials. It involves asking questions,
-                receiving feedback, practising new skills and connecting with people
-                who can support your academic development.
-              </p>
-              <div className="mt-8 space-y-4 text-sm font-medium text-slate-200">
-                <p>✓ Instructor-led learning and academic guidance</p>
-                <p>✓ Assignments, quizzes and learning activities</p>
-                <p>✓ Discussions and collaborative study spaces</p>
-                <p>✓ Access to academic information and resources</p>
+            <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+              <div className="bg-surface rounded-xl shadow-sm border border-border p-8 hover:shadow-md transition-shadow">
+                <div className="h-12 w-12 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 mb-6"><BookIcon size={24} /></div>
+                <h3 className="text-xl font-bold text-fg mb-3">Structured Courses</h3>
+                <p className="text-fg-muted leading-relaxed">Engaging video lessons, downloadable materials, and organised modules designed for deep understanding.</p>
               </div>
-              <Link href="/instructors" className="mt-9 inline-flex rounded-xl bg-blue-600 px-6 py-3.5 font-bold text-white transition hover:bg-blue-500">
-                Meet the instructors →
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Community */}
-        <section className="bg-blue-50 py-20">
-          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <div>
-              <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Learning community</p>
-              <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                Learning is stronger when we learn together.
-              </h2>
-              <p className="mt-5 leading-8 text-slate-600">
-                Join academic conversations, explore study groups, participate in
-                learning events and exchange ideas with the wider learning community.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/discussions" className="rounded-xl bg-blue-700 px-6 py-3.5 font-bold text-white hover:bg-blue-800">
-                  Join discussions
-                </Link>
-                <Link href="/study-groups" className="rounded-xl border border-blue-200 bg-white px-6 py-3.5 font-bold text-blue-800 hover:bg-blue-100">
-                  Explore study groups
-                </Link>
+              <div className="bg-surface rounded-xl shadow-sm border border-border p-8 hover:shadow-md transition-shadow">
+                <div className="h-12 w-12 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 mb-6"><ShieldIcon size={24} /></div>
+                <h3 className="text-xl font-bold text-fg mb-3">Secure Assessments</h3>
+                <p className="text-fg-muted leading-relaxed">Timed quizzes, graded assignments, and direct instructor feedback to measure progress effectively.</p>
+              </div>
+              <div className="bg-surface rounded-xl shadow-sm border border-border p-8 hover:shadow-md transition-shadow">
+                <div className="h-12 w-12 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 mb-6"><ChartIcon size={24} /></div>
+                <h3 className="text-xl font-bold text-fg mb-3">Progress Tracking</h3>
+                <p className="text-fg-muted leading-relaxed">Detailed analytics for students, instructors, and administrators to ensure academic success.</p>
               </div>
             </div>
-            <img
-              src="/images/education/library-study-support.jpg"
-              alt="Students studying in a library"
-              className="h-[340px] w-full rounded-2xl object-cover shadow-lg"
-            />
           </div>
         </section>
 
-        {/* Final call to action */}
-        <section className="bg-white px-4 py-20 text-center">
-          <div className="mx-auto max-w-4xl">
-            <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-blue-700">Get started</p>
-            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Take the next step in your learning journey.
-            </h2>
-            <p className="mx-auto mt-5 max-w-2xl leading-8 text-slate-600">
-              Explore the platform, discover learning opportunities and create an
-              account to access your learning workspace.
-            </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link href="/register" className="rounded-xl bg-blue-700 px-8 py-4 font-bold text-white shadow hover:bg-blue-800">
-                Create an account →
-              </Link>
-              <Link href="/login" className="rounded-xl border border-slate-300 px-8 py-4 font-bold text-slate-800 hover:bg-slate-50">
-                Sign in to Learn
-              </Link>
+        <section className="py-16 bg-white overflow-hidden lg:py-24">
+          <div className="relative max-w-xl mx-auto px-4 sm:px-6 lg:px-8 lg:max-w-7xl">
+            <div className="relative lg:grid lg:grid-cols-2 lg:gap-24 lg:items-center">
+              <div className="relative">
+                <img className="w-full rounded-2xl shadow-lg object-cover h-80 lg:h-96" src="/images/education/teacher-helping.jpg" alt="Teacher helping students" />
+              </div>
+              <div className="mt-12 lg:mt-0">
+                <h2 className="text-3xl font-extrabold text-fg tracking-tight sm:text-4xl">Expert instruction, <br /><span className="text-brand-600">personalised support.</span></h2>
+                <p className="mt-4 text-lg text-fg-muted leading-relaxed">Learning doesn't happen in isolation. Our instructors are industry professionals dedicated to your success. They provide direct feedback, host live sessions, and guide you through complex topics.</p>
+                <div className="mt-8 space-y-4">
+                  <div className="flex items-center"><div className="flex-shrink-0 h-6 w-6 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">✓</div><p className="ml-3 text-base text-fg">1-on-1 assignment reviews</p></div>
+                  <div className="flex items-center"><div className="flex-shrink-0 h-6 w-6 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">✓</div><p className="ml-3 text-base text-fg">Live interactive sessions</p></div>
+                  <div className="flex items-center"><div className="flex-shrink-0 h-6 w-6 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-sm">✓</div><p className="ml-3 text-base text-fg">Dedicated student support centre</p></div>
+                </div>
+                <div className="mt-8">
+                  <Link href="/about" className="text-brand-600 font-medium hover:text-brand-800 flex items-center">Learn more about our faculty <span className="ml-2">→</span></Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-brand-50 py-16">
+          <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-extrabold text-brand-800 sm:text-4xl">Ready to start your learning journey?</h2>
+            <p className="mt-4 text-lg text-brand-700">Join thousands of students and professionals building their future with Learn.</p>
+            <div className="mt-8 flex justify-center space-x-4">
+              <Link href="/register" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-brand-600 hover:bg-brand-700 md:py-4 md:text-lg transition-colors shadow-sm">Get Started Today</Link>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer navigation */}
-      <footer className="bg-slate-950 text-slate-300">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <Link href="/" className="text-2xl font-black text-white">
-                Learn<span className="text-blue-400">.</span>
-              </Link>
-              <p className="mt-4 max-w-xs text-sm leading-7 text-slate-400">
-                A connected digital environment for teaching, learning and academic growth.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-extrabold text-white">Learning</h3>
-              <ul className="mt-4 space-y-3 text-sm">
-                <li><Link href="/courses" className="hover:text-blue-300">Courses</Link></li>
-                <li><Link href="/instructors" className="hover:text-blue-300">Instructors</Link></li>
-                <li><Link href="/assignments" className="hover:text-blue-300">Assignments</Link></li>
-                <li><Link href="/quizzes" className="hover:text-blue-300">Quizzes</Link></li>
-                <li><Link href="/resources" className="hover:text-blue-300">Resources</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-extrabold text-white">Community</h3>
-              <ul className="mt-4 space-y-3 text-sm">
-                <li><Link href="/discussions" className="hover:text-blue-300">Discussions</Link></li>
-                <li><Link href="/study-groups" className="hover:text-blue-300">Study groups</Link></li>
-                <li><Link href="/events" className="hover:text-blue-300">Events</Link></li>
-                <li><Link href="/live" className="hover:text-blue-300">Live learning</Link></li>
-                <li><Link href="/careers" className="hover:text-blue-300">Careers</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-extrabold text-white">Information</h3>
-              <ul className="mt-4 space-y-3 text-sm">
-                <li><Link href="/about" className="hover:text-blue-300">About Learn</Link></li>
-                <li><Link href="/admissions" className="hover:text-blue-300">Admissions</Link></li>
-                <li><Link href="/academic-calendar" className="hover:text-blue-300">Academic calendar</Link></li>
-                <li><Link href="/contact" className="hover:text-blue-300">Contact</Link></li>
-                <li><Link href="/login" className="hover:text-blue-300">Student sign in</Link></li>
-              </ul>
-            </div>
+      <footer className="bg-brand-800 text-white">
+        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div><h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Platform</h3><ul className="space-y-3"><li><Link href="/courses" className="text-base text-gray-300 hover:text-white transition-colors">Courses</Link></li><li><Link href="/programmes" className="text-base text-gray-300 hover:text-white transition-colors">Programmes</Link></li><li><Link href="/instructors" className="text-base text-gray-300 hover:text-white transition-colors">Instructors</Link></li><li><Link href="/resources" className="text-base text-gray-300 hover:text-white transition-colors">Resources</Link></li></ul></div>
+            <div><h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Support</h3><ul className="space-y-3"><li><Link href="/help" className="text-base text-gray-300 hover:text-white transition-colors">Help Centre</Link></li><li><Link href="/contact" className="text-base text-gray-300 hover:text-white transition-colors">Contact Us</Link></li><li><Link href="/faq" className="text-base text-gray-300 hover:text-white transition-colors">FAQs</Link></li></ul></div>
+            <div><h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Company</h3><ul className="space-y-3"><li><Link href="/about" className="text-base text-gray-300 hover:text-white transition-colors">About Learn</Link></li><li><Link href="/about/leadership" className="text-base text-gray-300 hover:text-white transition-colors">Leadership</Link></li><li><Link href="/careers" className="text-base text-gray-300 hover:text-white transition-colors">Careers</Link></li></ul></div>
+            <div><h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Legal</h3><ul className="space-y-3"><li><Link href="/privacy" className="text-base text-gray-300 hover:text-white transition-colors">Privacy Policy</Link></li><li><Link href="/terms" className="text-base text-gray-300 hover:text-white transition-colors">Terms of Service</Link></li></ul></div>
           </div>
-
-          <div className="mt-12 flex flex-col gap-4 border-t border-slate-800 pt-7 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} Learn Education Platform. All rights reserved.</p>
-            <div className="flex gap-5">
-              <Link href="/about" className="hover:text-white">About</Link>
-              <Link href="/contact" className="hover:text-white">Contact</Link>
-              <Link href="/login" className="hover:text-white">Account</Link>
+          <div className="mt-12 border-t border-brand-700 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-base text-gray-400">© 2024 Learn Education Platform. All rights reserved.</p>
+            <div className="mt-4 md:mt-0 flex space-x-6">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Twitter</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">LinkedIn</a>
             </div>
           </div>
         </div>
