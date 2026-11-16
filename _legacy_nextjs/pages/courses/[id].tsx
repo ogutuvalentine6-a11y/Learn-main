@@ -38,10 +38,10 @@ interface CurriculumResponse {
     price: number;
     category?: string;
     learningOutcomes?: string[];
+    instructor?: InstructorInfo | null;
   };
   modules: CurriculumModule[];
   standaloneSessions: CurriculumSession[];
-  instructor?: InstructorInfo | null;
 }
 
 interface RelatedCourse {
@@ -463,21 +463,21 @@ export default function CourseDetail() {
                     Back to all courses
                   </Link>
 
-                  {data.instructor && data.instructor.fullName && (
+                  {course.instructor && course.instructor.fullName && (
                     <div className="mt-6 pt-6 border-t border-border">
                       <p className="text-xs uppercase font-semibold text-fg-muted tracking-wide mb-3">
                         Your instructor
                       </p>
                       <div className="flex items-center gap-3">
-                        {data.instructor.avatarUrl ? (
+                        {course.instructor.avatarUrl ? (
                           <img
-                            src={data.instructor.avatarUrl}
-                            alt={data.instructor.fullName}
+                            src={course.instructor.avatarUrl}
+                            alt={course.instructor.fullName}
                             className="w-12 h-12 rounded-full object-cover"
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold">
-                            {data.instructor.fullName
+                            {course.instructor.fullName
                               .split(" ")
                               .map((s) => s[0])
                               .slice(0, 2)
@@ -486,11 +486,11 @@ export default function CourseDetail() {
                         )}
                         <div className="min-w-0">
                           <p className="font-semibold text-fg truncate">
-                            {data.instructor.fullName}
+                            {course.instructor.fullName}
                           </p>
-                          {data.instructor.title && (
+                          {course.instructor.title && (
                             <p className="text-xs text-fg-muted truncate">
-                              {data.instructor.title}
+                              {course.instructor.title}
                             </p>
                           )}
                         </div>
