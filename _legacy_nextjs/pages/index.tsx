@@ -136,6 +136,19 @@ export default function Home() {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
   const heroTitle = cms?.hero?.title ?? "Learn Without Limits. Build Your Future.";
   const heroSubtitle = cms?.hero?.subtitle ??
     "Structured courses, live classrooms, expert instructors, and measurable progress — one connected learning platform.";
@@ -178,13 +191,15 @@ export default function Home() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 rounded-md text-fg-muted hover:text-fg hover:bg-surface-2"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               {mobileMenuOpen ? <XIcon size={24} /> : <MenuIcon size={24} />}
             </button>
           </div>
         </div>
         {mobileMenuOpen && (
-          <div className="md:hidden bg-surface border-t border-border">
+          <div id="mobile-menu" className="md:hidden bg-surface border-t border-border animate-home-slide-down">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link href="/courses" className="block px-3 py-2 rounded-md text-base font-medium text-fg hover:bg-surface-2">Courses</Link>
               <Link href="/instructors" className="block px-3 py-2 rounded-md text-base font-medium text-fg hover:bg-surface-2">Instructors</Link>
@@ -206,11 +221,11 @@ export default function Home() {
             <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
               <div className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                 <div className="sm:text-center lg:text-left">
-                  <h1 className="text-4xl tracking-tight font-extrabold text-fg sm:text-5xl md:text-6xl">
+                  <h1 className="text-4xl tracking-tight font-extrabold text-fg sm:text-5xl md:text-6xl animate-home-fade-in-up">
                     <span className="block xl:inline">Empowering Learning.</span>{" "}
                     <span className="block text-brand-600 xl:inline">Building Knowledge.</span>
                   </h1>
-                  <p className="mt-3 text-base text-fg-muted sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                  <p className="mt-3 text-base text-fg-muted sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0 animate-home-fade-in" style={{ animationDelay: "0.15s" }}>
                     {heroSubtitle}
                   </p>
                   <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start sm:gap-3">
@@ -242,7 +257,7 @@ export default function Home() {
 
         {/* Stats — only if real data exists */}
         {showStats && (
-          <section className="bg-brand-800 py-12">
+          <section className="bg-brand-800 py-12 animate-home-fade-in">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-2 gap-8 md:grid-cols-4 text-center">
                 <div>
@@ -300,7 +315,7 @@ export default function Home() {
               ) : (
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                   {courses.map((course, idx) => (
-                    <article key={course._id} className="bg-surface rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow">
+                    <article key={course._id} className="bg-surface rounded-xl border border-border overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-200">
                       <img
                         src={courseImage(course, idx)}
                         alt={course.title}
@@ -339,7 +354,7 @@ export default function Home() {
               </p>
             </div>
             <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-              <Link href="/resources" className="bg-surface rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
+              <Link href="/resources" className="bg-surface rounded-xl border border-border p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200">
                 <div className="h-12 w-12 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 mb-4"><FileIcon size={24} /></div>
                 <h3 className="text-lg font-bold text-fg mb-2">Learning Resources</h3>
                 <p className="text-sm text-fg-muted leading-relaxed">PDFs, notes, study guides, and downloadable course materials.</p>
