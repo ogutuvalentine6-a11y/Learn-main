@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { VideoIcon } from "@/components/layout/icons";
+import Navbar from "@/components/Navbar";
 
 // ──────── CONFIG — replace with YOUR channel when ready ────────
 const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@khanacademy";
@@ -135,6 +136,8 @@ export default function ReelsPage() {
   }, [reels]);
 
   return (
+    <>
+      <Navbar />
     <div className="min-h-screen bg-bg text-fg font-sans">
       <section className="bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -351,5 +354,6 @@ export default function ReelsPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
