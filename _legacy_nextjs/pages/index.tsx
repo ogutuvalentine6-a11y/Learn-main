@@ -4,6 +4,7 @@ import {
   MenuIcon, XIcon, BookIcon, ShieldIcon, ChartIcon,
   VideoIcon, FileIcon, UsersIcon, AwardIcon,
 } from "@/components/layout/icons";
+import FooterMega from "@/components/FooterMega";
 
 interface PublicStats {
   students?: number;
@@ -596,58 +597,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-brand-800 text-white">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Platform</h3>
-              <ul className="space-y-3">
-                <li><Link href="/courses" className="text-base text-gray-300 hover:text-white transition-colors">Courses</Link></li>
-                <li><Link href="/instructors" className="text-base text-gray-300 hover:text-white transition-colors">Instructors</Link></li>
-                <li><Link href="/resources" className="text-base text-gray-300 hover:text-white transition-colors">Resources</Link></li>
-                <li><Link href="/reels" className="text-base text-gray-300 hover:text-white transition-colors">Videos</Link></li>
-                <li><Link href="/live" className="text-base text-gray-300 hover:text-white transition-colors">Live Sessions</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Learn</h3>
-              <ul className="space-y-3">
-                <li><Link href="/quizzes" className="text-base text-gray-300 hover:text-white transition-colors">Quizzes</Link></li>
-                <li><Link href="/events" className="text-base text-gray-300 hover:text-white transition-colors">Events</Link></li>
-                <li><Link href="/leaderboard" className="text-base text-gray-300 hover:text-white transition-colors">Leaderboard</Link></li>
-                <li><Link href="/academic-calendar" className="text-base text-gray-300 hover:text-white transition-colors">Calendar</Link></li>
-                <li><Link href="/discussions" className="text-base text-gray-300 hover:text-white transition-colors">Discussions</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Company</h3>
-              <ul className="space-y-3">
-                <li><Link href="/about" className="text-base text-gray-300 hover:text-white transition-colors">About</Link></li>
-                <li><Link href="/careers" className="text-base text-gray-300 hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/contact" className="text-base text-gray-300 hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href="/admissions" className="text-base text-gray-300 hover:text-white transition-colors">Admissions</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-brand-200 tracking-wider uppercase mb-4">Legal</h3>
-              <ul className="space-y-3">
-                <li><Link href="/privacy" className="text-base text-gray-300 hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="text-base text-gray-300 hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><Link href="/help" className="text-base text-gray-300 hover:text-white transition-colors">Help Centre</Link></li>
-                <li><Link href="/faq" className="text-base text-gray-300 hover:text-white transition-colors">FAQs</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 border-t border-brand-700 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-400">©2024 Learn Education Platform. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Twitter</a>
-              <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">LinkedIn</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <FooterMega />
     </div>
   );
 }
