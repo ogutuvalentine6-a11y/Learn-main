@@ -34,6 +34,7 @@ const NAV: Record<string, Item[]> = {
     { label: "Student Progress", href: "/staff/student-progress" },
     { label: "Review Submissions", href: "/staff/review-submission" },
     { label: "Resources", href: "/resources" },
+    { label: "Upload Videos", href: "/staff/videos" },
     { label: "Reels", href: "/reels" },
     { label: "Live Sessions", href: "/live" },
     { label: "Discussions", href: "/discussions" },

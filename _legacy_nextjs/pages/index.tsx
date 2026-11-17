@@ -52,7 +52,8 @@ interface Founder {
 }
 
 interface Instructor {
-  _id: string;
+  _id?: string;
+  id?: string;
   fullName?: string;
   name?: string;
   title?: string;
@@ -160,19 +161,77 @@ export default function Home() {
       .catch(() => { if (!cancelled) setInstructorsLoading(false); });
 
     (async () => {
-      let list: CalendarEvent[] = [];
-      for (const url of ["/api/events", "/api/academic/events"]) {
+      const fetchEventList = async (url: string): Promise<unknown[]> => {
         try {
-          const r = await fetch(url);
-          if (r.ok) {
-            const d = await r.json();
-            list = Array.isArray(d) ? d : (d?.items || []);
-            break;
+          const response = await fetch(url);
+          if (!response.ok) return [];
+
+          const data: unknown = await response.json();
+
+          if (Array.isArray(data)) return data;
+
+          if (
+            data !== null &&
+            typeof data === "object" &&
+            "items" in data &&
+            Array.isArray(data.items)
+          ) {
+            return data.items;
           }
-        } catch {}
-      }
+
+          return [];
+        } catch {
+          return [];
+        }
+      };
+
+      const [liveItems, academicItems] = await Promise.all([
+        fetchEventList("/api/events/upcoming"),
+        fetchEventList("/api/academic/calendar/events?upcoming=true"),
+      ]);
+
+      const normalizeEvents = (
+        items: unknown[],
+        source: "live" | "academic"
+      ): CalendarEvent[] =>
+        items.map((item, index) => {
+          const event =
+            item !== null && typeof item === "object"
+              ? (item as Record<string, unknown>)
+              : {};
+
+          const rawId = event.id ?? event._id;
+          const rawStart =
+            event.scheduledAt ?? event.startDate ?? event.startAt;
+          const rawEnd = event.endDate ?? event.endAt;
+
+          return {
+            _id: `${source}-${String(rawId ?? index)}`,
+            title:
+              typeof event.title === "string" ? event.title : undefined,
+            description:
+              typeof event.description === "string"
+                ? event.description
+                : undefined,
+            startAt:
+              typeof rawStart === "string" ? rawStart : undefined,
+            endAt: typeof rawEnd === "string" ? rawEnd : undefined,
+          };
+        });
+
+      const combined = [
+        ...normalizeEvents(liveItems, "live"),
+        ...normalizeEvents(academicItems, "academic"),
+      ]
+        .filter((event) => event.startAt)
+        .sort(
+          (a, b) =>
+            new Date(a.startAt!).getTime() -
+            new Date(b.startAt!).getTime()
+        );
+
       if (!cancelled) {
-        setEvents(list);
+        setEvents(combined);
         setEventsLoading(false);
       }
     })();
@@ -622,9 +681,11 @@ export default function Home() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {instructors.slice(0, 4).map((inst) => {
+                  const instructorId = inst.id || inst._id;
+                  if (!instructorId) return null;
                   const nm = inst.fullName || inst.name || "Instructor";
                   return (
-                    <Link key={inst._id} href={`/instructors/${inst._id}`} className="group bg-surface rounded-xl border border-border p-6 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+                    <Link key={instructorId} href={`/instructors/${instructorId}`} className="group bg-surface rounded-xl border border-border p-6 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-200">
                       {inst.avatarUrl ? (
                         <img src={inst.avatarUrl} alt={nm} className="w-20 h-20 rounded-full object-cover mx-auto" />
                       ) : (

@@ -115,7 +115,7 @@ export default function CoursesPage() {
                 {/* Thumbnail */}
                 <div className="relative h-48 bg-surface-2 overflow-hidden">
                   <img 
-                    src={course.image || "/images/education/classroom-lecture.jpg"} 
+                    src={course.image || "/images/education/classroom-learning.jpg"}
                     alt={course.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

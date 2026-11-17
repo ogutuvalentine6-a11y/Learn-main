@@ -3,357 +3,463 @@ import Link from "next/link";
 import { VideoIcon } from "@/components/layout/icons";
 import Navbar from "@/components/Navbar";
 
-// ──────── CONFIG — replace with YOUR channel when ready ────────
 const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@khanacademy";
 const YOUTUBE_CHANNEL_NAME = "Khan Academy";
-// ────────────────────────────────────────────────────────────────
-
-const CATEGORIES = [
-  "Programming",
-  "Mathematics",
-  "Science",
-  "Business",
-  "Engineering",
-  "Career and Study Skills",
-] as const;
-type Category = (typeof CATEGORIES)[number] | "All";
 
 interface Reel {
   _id: string;
-  title?: string;
-  caption?: string;
-  videoUrl?: string;
+  title: string;
+  description?: string;
+  videoUrl: string;
   thumbnailUrl?: string;
   category?: string;
-  duration?: number;
-  isFeatured?: boolean;
+  durationSeconds?: number;
+  views?: number;
+  likes?: number;
+  tags?: string[];
   createdAt?: string;
 }
 
 function extractYouTubeId(url?: string): string | null {
   if (!url) return null;
+
   const patterns = [
     /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
     /^([A-Za-z0-9_-]{11})$/,
   ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
   }
+
   return null;
 }
 
 function thumbnailFor(reel: Reel): string | null {
   if (reel.thumbnailUrl) return reel.thumbnailUrl;
-  const id = extractYouTubeId(reel.videoUrl);
-  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
+
+  const youtubeId = extractYouTubeId(reel.videoUrl);
+  return youtubeId
+    ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
+    : null;
 }
 
 function formatDuration(seconds?: number): string | null {
   if (!seconds || seconds <= 0) return null;
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  return h > 0
-    ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-    : `${m}:${String(s).padStart(2, "0")}`;
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`
+    : `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
 export default function ReelsPage() {
   const [reels, setReels] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<Category>("All");
-  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+  const [category, setCategory] = useState("All");
+  const [activeReel, setActiveReel] = useState<Reel | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const endpoints = ["/api/reels", "/api/public/reels", "/api/reels?status=published"];
-      for (const url of endpoints) {
-        try {
-          const r = await fetch(url);
-          if (r.ok) {
-            const d = await r.json();
-            const list = Array.isArray(d) ? d : d?.items || [];
-            if (!cancelled) {
-              setReels(list);
-              setLoading(false);
-            }
-            return;
-          }
-        } catch {}
+
+    async function loadVideos() {
+      try {
+        const response = await fetch("/api/reels?limit=100", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not load the educational video library.");
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("The video API returned an unexpected response.");
+        }
+
+        if (!cancelled) setReels(data);
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Could not load videos."
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      if (!cancelled) {
-        setErr(
-          "Could not load videos. If the endpoint requires authentication, please sign in."
-        );
-        setLoading(false);
-      }
-    })();
+    }
+
+    loadVideos();
+
     return () => {
       cancelled = true;
     };
   }, []);
 
   useEffect(() => {
-    if (!activeVideoId) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActiveVideoId(null);
-    };
-    window.addEventListener("keydown", onKey);
+    if (!activeReel) return;
+
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setActiveReel(null);
+    }
+
+    window.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
+
     return () => {
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", handleKey);
       document.body.style.overflow = "";
     };
-  }, [activeVideoId]);
+  }, [activeReel]);
+
+  function openVideo(reel: Reel) {
+    setActiveReel(reel);
+
+    // View tracking should never prevent playback.
+    fetch(`/api/reels/${reel._id}/view`, {
+      method: "POST",
+    }).catch(() => undefined);
+  }
+
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(reels.map((reel) => reel.category || "General"))
+    ).sort();
+  }, [reels]);
 
   const filtered = useMemo(() => {
-    return reels.filter((r) => {
-      if (category !== "All" && r.category !== category) return false;
-      if (!query.trim()) return true;
-      const q = query.toLowerCase();
+    const search = query.trim().toLowerCase();
+
+    return reels.filter((reel) => {
+      if (category !== "All" && (reel.category || "General") !== category) {
+        return false;
+      }
+
+      if (!search) return true;
+
       return (
-        (r.title || "").toLowerCase().includes(q) ||
-        (r.caption || "").toLowerCase().includes(q)
+        (reel.title || "").toLowerCase().includes(search) ||
+        (reel.description || "").toLowerCase().includes(search) ||
+        (reel.tags || []).some((tag: string) =>
+          tag.toLowerCase().includes(search)
+        )
       );
     });
   }, [reels, query, category]);
 
-  const featured = useMemo(() => {
-    const flagged = reels.filter((r) => r.isFeatured);
-    if (flagged.length >= 3) return flagged.slice(0, 3);
-    return [...reels]
-      .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
-      .slice(0, 3);
-  }, [reels]);
-
-  const visibleCategories = useMemo(() => {
-    const set = new Set(reels.map((r) => r.category).filter(Boolean));
-    return CATEGORIES.filter((c) => set.has(c));
-  }, [reels]);
+  const featured = useMemo(
+    () => reels.slice(0, 3),
+    [reels]
+  );
 
   return (
     <>
       <Navbar />
-    <div className="min-h-screen bg-bg text-fg font-sans">
-      <section className="bg-white border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-fg">Video Library</h1>
-              <p className="mt-3 text-lg text-fg-muted max-w-2xl">
-                Educational videos across Programming, Mathematics, Science, Business,
-                Engineering, and Career skills — curated for Learn students.
-              </p>
-            </div>
-            <a
-              href={YOUTUBE_CHANNEL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition-colors flex-shrink-0"
-            >
-              <span className="text-lg">▶</span>
-              Visit {YOUTUBE_CHANNEL_NAME} on YouTube
-            </a>
-          </div>
 
-          <div className="mt-8 space-y-4">
-            <input
-              type="search"
-              placeholder="Search videos by title or topic…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full max-w-xl px-4 py-3 rounded-lg border border-border bg-surface text-fg placeholder:text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand-600"
-              aria-label="Search videos"
-            />
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setCategory("All")}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                  category === "All"
-                    ? "bg-brand-600 text-white border-brand-600"
-                    : "bg-surface text-fg border-border hover:border-brand-600"
-                }`}
+      <main className="min-h-screen bg-bg font-sans text-fg">
+        <section className="border-b border-border bg-white">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-brand-600">
+                  Learn educational resources
+                </p>
+                <h1 className="mt-2 text-3xl font-extrabold md:text-4xl">
+                  Video Library
+                </h1>
+                <p className="mt-3 max-w-2xl text-lg text-fg-muted">
+                  Explore lessons in programming, mathematics, science,
+                  business, engineering, technology and career development.
+                </p>
+              </div>
+
+              <a
+                href={YOUTUBE_CHANNEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-red-600 px-5 py-3 font-medium text-white transition hover:bg-red-700"
               >
-                All
-              </button>
-              {visibleCategories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCategory(c)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                    category === c
-                      ? "bg-brand-600 text-white border-brand-600"
-                      : "bg-surface text-fg border-border hover:border-brand-600"
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
+                <span aria-hidden="true">▶</span>
+                Visit {YOUTUBE_CHANNEL_NAME}
+              </a>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {featured.length > 0 && category === "All" && !query && (
-        <section className="py-12 bg-surface">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-extrabold text-fg">Featured</h2>
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {featured.map((r) => {
-                const thumb = thumbnailFor(r);
-                const ytId = extractYouTubeId(r.videoUrl);
-                return (
+            <div className="mt-8 space-y-4">
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search videos by title, description or topic..."
+                aria-label="Search videos"
+                className="w-full max-w-xl rounded-lg border border-border bg-surface px-4 py-3 text-fg outline-none focus:ring-2 focus:ring-brand-600"
+              />
+
+              <div className="flex flex-wrap gap-2">
+                {["All", ...categories].map((item) => (
                   <button
-                    key={r._id}
-                    onClick={() => ytId && setActiveVideoId(ytId)}
-                    disabled={!ytId}
-                    className="group relative bg-bg rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow text-left disabled:opacity-70 disabled:cursor-not-allowed"
+                    key={item}
+                    type="button"
+                    onClick={() => setCategory(item)}
+                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                      category === item
+                        ? "border-brand-600 bg-brand-600 text-white"
+                        : "border-border bg-surface text-fg hover:border-brand-600"
+                    }`}
                   >
-                    <div className="relative aspect-video bg-surface-2">
-                      {thumb ? (
-                        <img src={thumb} alt={r.title || ""} className="w-full h-full object-cover" loading="lazy" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-fg-muted">
-                          <VideoIcon size={32} />
-                        </div>
-                      )}
-                      {ytId && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
-                          <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-brand-600 text-2xl">
-                            ▶
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-fg line-clamp-2">{r.title || r.caption || "Untitled video"}</h3>
-                      {r.category && <p className="mt-1 text-xs text-brand-600 uppercase tracking-wide font-medium">{r.category}</p>}
-                    </div>
+                    {item}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
         </section>
-      )}
 
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="bg-surface rounded-xl border border-border overflow-hidden animate-pulse">
-                  <div className="w-full aspect-video bg-surface-2" />
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-surface-2 rounded w-3/4" />
-                    <div className="h-3 bg-surface-2 rounded w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : err ? (
-            <div className="text-center py-16 bg-surface rounded-xl border border-border">
-              <div className="flex justify-center"><VideoIcon size={48} /></div>
-              <p className="mt-4 text-lg text-fg-muted max-w-xl mx-auto">{err}</p>
-              <Link href="/login" className="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-md bg-brand-600 text-white font-medium hover:bg-brand-700">Sign in</Link>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-16 bg-surface rounded-xl border border-border">
-              <div className="flex justify-center"><VideoIcon size={48} /></div>
-              <p className="mt-4 text-lg text-fg-muted">
-                {reels.length === 0 ? "No videos published yet." : "No videos match your filter."}
-              </p>
-              {reels.length === 0 ? (
-                <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-md bg-brand-600 text-white font-medium hover:bg-brand-700">
-                  Visit our YouTube channel
-                </a>
-              ) : (
-                <button onClick={() => { setQuery(""); setCategory("All"); }} className="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-md border border-border text-fg font-medium hover:bg-surface-2">
-                  Clear filters
-                </button>
-              )}
-            </div>
-          ) : (
-            <>
-              <p className="mb-6 text-sm text-fg-muted">
-                {filtered.length} video{filtered.length === 1 ? "" : "s"}
-                {category !== "All" && ` in ${category}`}
-                {query && ` matching "${query}"`}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filtered.map((r) => {
-                  const thumb = thumbnailFor(r);
-                  const ytId = extractYouTubeId(r.videoUrl);
-                  const dur = formatDuration(r.duration);
+        {!loading && !error && featured.length > 0 && category === "All" && !query && (
+          <section className="bg-surface py-10">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl font-bold">Recently published</h2>
+
+              <div className="mt-6 grid gap-6 md:grid-cols-3">
+                {featured.map((reel) => {
+                  const thumbnail = thumbnailFor(reel);
+
                   return (
                     <button
-                      key={r._id}
-                      onClick={() => ytId && setActiveVideoId(ytId)}
-                      disabled={!ytId}
-                      className="group bg-surface rounded-xl border border-border overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                      type="button"
+                      key={reel._id}
+                      onClick={() => openVideo(reel)}
+                      className="group overflow-hidden rounded-xl border border-border bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                     >
-                      <div className="relative aspect-video bg-surface-2 overflow-hidden">
-                        {thumb ? (
-                          <img src={thumb} alt={r.title || ""} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                      <div className="relative aspect-video bg-surface-2">
+                        {thumbnail ? (
+                          <img
+                            src={thumbnail}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-fg-muted"><VideoIcon size={32} /></div>
-                        )}
-                        {ytId && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-brand-600 text-2xl">▶</div>
+                          <div className="flex h-full items-center justify-center text-fg-muted">
+                            <VideoIcon size={36} />
                           </div>
                         )}
-                        {dur && <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-white text-xs font-medium">{dur}</span>}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-2xl text-brand-600">
+                            ▶
+                          </span>
+                        </div>
                       </div>
+
                       <div className="p-4">
-                        <h3 className="font-semibold text-fg line-clamp-2 group-hover:text-brand-600 transition-colors">
-                          {r.title || r.caption || "Untitled video"}
+                        <h3 className="line-clamp-2 font-semibold">
+                          {reel.title || "Untitled video"}
                         </h3>
-                        {r.category && <p className="mt-2 text-xs text-brand-600 uppercase tracking-wide font-medium">{r.category}</p>}
+                        <p className="mt-2 text-xs font-medium uppercase tracking-wide text-brand-600">
+                          {reel.category || "General"}
+                        </p>
                       </div>
                     </button>
                   );
                 })}
               </div>
-            </>
-          )}
-        </div>
-      </section>
+            </div>
+          </section>
+        )}
 
-      {activeVideoId && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-          onClick={() => setActiveVideoId(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Video player"
-        >
-          <div
-            className="relative w-full max-w-5xl aspect-video bg-black rounded-lg overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <iframe
-              src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1&rel=0&modestbranding=1`}
-              title="Video lesson"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full"
-            />
-            <button
-              onClick={() => setActiveVideoId(null)}
-              className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/70 text-white hover:bg-black/90 flex items-center justify-center text-xl font-bold"
-              aria-label="Close video"
-            >
-              ✕
-            </button>
+        <section className="py-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {loading ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="animate-pulse overflow-hidden rounded-xl border border-border bg-surface"
+                  >
+                    <div className="aspect-video bg-surface-2" />
+                    <div className="space-y-3 p-4">
+                      <div className="h-4 w-3/4 rounded bg-surface-2" />
+                      <div className="h-3 w-1/2 rounded bg-surface-2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="rounded-xl border border-border bg-surface px-5 py-16 text-center">
+                <VideoIcon size={44} />
+                <p className="mt-4 text-fg-muted">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="mt-5 rounded-lg bg-brand-600 px-5 py-2.5 text-white"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="rounded-xl border border-border bg-surface px-5 py-16 text-center">
+                <VideoIcon size={44} />
+                <h2 className="mt-4 text-lg font-semibold">
+                  {reels.length === 0
+                    ? "No educational videos published yet."
+                    : "No videos match your search."}
+                </h2>
+                <p className="mt-2 text-sm text-fg-muted">
+                  {reels.length === 0
+                    ? "Published lessons will appear here."
+                    : "Try another search term or clear your category filter."}
+                </p>
+                {reels.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      setCategory("All");
+                    }}
+                    className="mt-4 rounded-lg border border-border px-4 py-2 text-sm"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                <p className="mb-6 text-sm text-fg-muted">
+                  Showing {filtered.length} video{filtered.length === 1 ? "" : "s"}
+                </p>
+
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filtered.map((reel) => {
+                    const thumbnail = thumbnailFor(reel);
+                    const duration = formatDuration(reel.durationSeconds);
+
+                    return (
+                      <button
+                        type="button"
+                        key={reel._id}
+                        onClick={() => openVideo(reel)}
+                        className="group overflow-hidden rounded-xl border border-border bg-surface text-left transition hover:-translate-y-1 hover:shadow-lg"
+                      >
+                        <div className="relative aspect-video overflow-hidden bg-surface-2">
+                          {thumbnail ? (
+                            <img
+                              src={thumbnail}
+                              alt=""
+                              loading="lazy"
+                              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-fg-muted">
+                              <VideoIcon size={34} />
+                            </div>
+                          )}
+
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/20">
+                            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-xl text-brand-600 opacity-90">
+                              ▶
+                            </span>
+                          </div>
+
+                          {duration && (
+                            <span className="absolute bottom-2 right-2 rounded bg-black/75 px-2 py-1 text-xs text-white">
+                              {duration}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="p-4">
+                          <h3 className="line-clamp-2 font-semibold text-fg">
+                            {reel.title || "Untitled video"}
+                          </h3>
+                          <p className="mt-2 line-clamp-2 text-sm text-fg-muted">
+                            {reel.description || "Educational lesson"}
+                          </p>
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+                              {reel.category || "General"}
+                            </span>
+                            <span className="text-xs text-fg-muted">
+                              {reel.views || 0} views
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+        </section>
+
+        {activeReel && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-3 sm:p-6"
+            onClick={() => setActiveReel(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Educational video player"
+          >
+            <div
+              className="relative w-full max-w-6xl overflow-hidden rounded-xl bg-black"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between gap-4 bg-gray-950 px-4 py-3 text-white">
+                <h2 className="line-clamp-1 text-sm font-semibold sm:text-base">
+                  {activeReel.title}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setActiveReel(null)}
+                  aria-label="Close video"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-xl hover:bg-white/20"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="aspect-video w-full bg-black">
+                {extractYouTubeId(activeReel.videoUrl) ? (
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(activeReel.videoUrl)}?autoplay=1&rel=0`}
+                    title={activeReel.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="h-full w-full"
+                  />
+                ) : (
+                  <video
+                    key={activeReel._id}
+                    src={activeReel.videoUrl}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                    className="h-full w-full"
+                  >
+                    Your browser does not support HTML video playback.
+                  </video>
+                )}
+              </div>
+
+              <div className="bg-gray-950 px-4 py-3 text-white">
+                <p className="text-sm text-gray-300">
+                  {activeReel.description || "Educational video"}
+                </p>
+                <p className="mt-2 text-xs text-gray-400">
+                  {activeReel.category || "General"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </>
   );
 }
